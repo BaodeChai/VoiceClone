@@ -27,7 +27,7 @@ export function TextToSpeechSection({ models }: TextToSpeechSectionProps) {
 
   // 生成语音
   const handleGenerateSpeech = async () => {
-    if (!text || !selectedModelId) {
+    if (!text || !selectedModelId || selectedModelId === 'no-models') {
       alert('请输入文本并选择语音模型');
       return;
     }
@@ -75,7 +75,7 @@ export function TextToSpeechSection({ models }: TextToSpeechSectionProps) {
           </SelectTrigger>
           <SelectContent>
             {availableModels.length === 0 ? (
-              <SelectItem value="" disabled>
+              <SelectItem value="no-models" disabled>
                 暂无可用模型，请先创建声音模型
               </SelectItem>
             ) : (
@@ -112,7 +112,7 @@ export function TextToSpeechSection({ models }: TextToSpeechSectionProps) {
       {/* 生成按钮 */}
       <Button
         onClick={handleGenerateSpeech}
-        disabled={!text || !selectedModelId || isGenerating || availableModels.length === 0}
+        disabled={!text || !selectedModelId || selectedModelId === 'no-models' || isGenerating || availableModels.length === 0}
         className="w-full"
       >
         {isGenerating ? '生成中...' : '生成语音'}
