@@ -8,12 +8,16 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 // 支持的音频格式
 const SUPPORTED_AUDIO_FORMATS = [
-  'audio/mpeg',
-  'audio/wav',
-  'audio/wave',
-  'audio/x-wav',
-  'audio/flac',
-  'audio/x-flac',
+  'audio/mpeg',      // MP3
+  'audio/mp3',       // MP3 (alternative)
+  'audio/wav',       // WAV
+  'audio/wave',      // WAV (alternative)
+  'audio/x-wav',     // WAV (x-type)
+  'audio/flac',      // FLAC
+  'audio/x-flac',    // FLAC (x-type)
+  'audio/mp4',       // M4A
+  'audio/m4a',       // M4A
+  'audio/x-m4a',     // M4A (x-type)
 ];
 
 // 确保上传目录存在
@@ -66,6 +70,10 @@ export function getAudioMimeType(filePath: string): string {
       return 'audio/wav';
     case '.flac':
       return 'audio/flac';
+    case '.m4a':
+      return 'audio/m4a';
+    case '.mp4':
+      return 'audio/mp4';
     default:
       return 'audio/mpeg';
   }

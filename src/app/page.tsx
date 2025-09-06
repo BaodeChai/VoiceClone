@@ -58,7 +58,7 @@ export default function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <TextToSpeechSection models={models} />
+              <TextToSpeechSection models={models} onModelDeleted={fetchModels} />
             </CardContent>
           </Card>
         </div>

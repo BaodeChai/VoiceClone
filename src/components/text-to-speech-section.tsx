@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Trash2 } from 'lucide-react';
 
 interface Model {
   id: string;
@@ -13,17 +14,57 @@ interface Model {
   description?: string;
   status: string;
   fishModelId?: string;
+  createdAt?: string;
 }
 
 interface TextToSpeechSectionProps {
   models: Model[];
+  onModelDeleted: () => void;
 }
 
-export function TextToSpeechSection({ models }: TextToSpeechSectionProps) {
+export function TextToSpeechSection({ models, onModelDeleted }: TextToSpeechSectionProps) {
   const [text, setText] = useState('');
   const [selectedModelId, setSelectedModelId] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string>('');
+
+  // 格式化时间显示
+  const formatDateTime = (dateString?: string): string => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit', 
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // 删除模型
+  const handleDeleteModel = async (modelId: string, modelTitle: string) => {
+    if (!confirm(`确定要删除模型"${modelTitle}"吗？此操作不可撤销。`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/models/${modelId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('模型删除成功！');
+        onModelDeleted();
+      } else {
+        alert('删除失败: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('删除失败');
+    }
+  };
 
   // 生成语音
   const handleGenerateSpeech = async () => {
@@ -166,27 +207,45 @@ export function TextToSpeechSection({ models }: TextToSpeechSectionProps) {
                   key={model.id}
                   className="flex items-center justify-between p-3 border rounded-lg"
                 >
-                  <div>
-                    <h4 className="font-medium">{model.title}</h4>
-                    {model.description && (
-                      <p className="text-sm text-muted-foreground">
-                        {model.description}
-                      </p>
-                    )}
-                  </div>
-                  <div className="text-sm">
-                    <span
-                      className={`inline-block px-2 py-1 rounded text-xs ${
-                        model.status === 'ready'
-                          ? 'bg-green-100 text-green-800'
-                          : model.status === 'creating'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {model.status === 'ready' ? '已完成' : 
-                       model.status === 'creating' ? '创建中' : '失败'}
-                    </span>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-medium">{model.title}</h4>
+                        {model.description && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {model.description}
+                          </p>
+                        )}
+                        {model.createdAt && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            创建时间: {formatDateTime(model.createdAt)}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2 ml-4">
+                        <span
+                          className={`inline-block px-2 py-1 rounded text-xs ${
+                            model.status === 'ready'
+                              ? 'bg-green-100 text-green-800'
+                              : model.status === 'creating'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {model.status === 'ready' ? '已完成' : 
+                           model.status === 'creating' ? '创建中' : '失败'}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteModel(model.id, model.title)}
+                          className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
+                          title="删除模型"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
