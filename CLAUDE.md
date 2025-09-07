@@ -4,15 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-声音克隆网站 - 基于 Next.js 14 + Fish Audio SDK 的全栈应用，实现声音模型创建和文本转语音功能。
+声音克隆网站 - 基于 Next.js 15 + Fish Audio SDK 的全栈应用，实现声音模型创建和文本转语音功能。
 
 ## 技术栈
 
-- **Frontend**: Next.js 14, React 19, TypeScript, Tailwind CSS v4, shadcn/ui
-- **Backend**: Next.js API Routes
+- **Frontend**: Next.js 15.5.2, React 19, TypeScript, Tailwind CSS v4, shadcn/ui
+- **Backend**: Next.js API Routes  
 - **Database**: SQLite + Drizzle ORM
-- **Audio**: Fish Audio SDK
+- **Audio**: Fish Audio SDK (v2025.6.8)
 - **UI**: shadcn/ui components with Radix UI
+- **Build Tool**: Turbopack (Next.js dev/build)
 
 ## 开发命令
 
@@ -46,25 +47,32 @@ Next.js App Router 全栈应用
 ```
 src/
 ├── app/                 # Next.js App Router
-│   ├── page.tsx        # 主页面 (声音克隆 + TTS)
+│   ├── page.tsx        # 主页面 (首页营销页面)
+│   ├── clone/          # 声音克隆页面
+│   ├── synthesis/      # 文本转语音页面  
+│   ├── system/         # 模型管理页面
+│   ├── models/         # 模型列表页面
 │   └── api/            # API Routes
 │       ├── upload/     # 音频文件上传
 │       ├── models/     # 声音模型管理
+│       │   ├── create/ # 创建模型
+│       │   └── [id]/   # 删除模型
 │       ├── tts/        # 文本转语音生成
 │       └── audio/[id]/ # 音频文件访问
 ├── components/         # React 组件
-│   ├── ui/            # shadcn/ui 基础组件
-│   ├── voice-clone-section.tsx    # 声音克隆功能
-│   └── text-to-speech-section.tsx # TTS 功能
+│   ├── ui/            # shadcn/ui 基础组件 (button, card, dialog 等)
+│   ├── header.tsx     # 全局导航栏
+│   └── footer.tsx     # 全局页脚
 └── lib/               # 工具库和配置
     ├── db/            # 数据库配置和 schema
     ├── upload/        # 文件上传处理
+    ├── audio-format.ts # 音频格式化工具
     └── fish-audio.ts  # Fish Audio SDK 封装
 ```
 
 ### 数据库设计
-- **models**: 声音模型表 (id, title, fishModelId, status, audioPath)
-- **tts_history**: TTS 生成历史 (id, modelId, text, audioPath, format)
+- **models**: 声音模型表 (id, title, fishModelId, status, audioPath, audioDuration, audioSize)
+- **tts_history**: TTS 生成历史 (id, modelId, text, audioPath, format) - 用于实际使用统计
 
 ## 环境配置
 
@@ -102,17 +110,23 @@ MAX_FILE_SIZE=50MB
 - `/api/models/create` ↔ `fishSession.create_model()`
 - `/api/tts` ↔ `fishSession.tts(TTSRequest())`
 
-## 已知问题和修复点
+## 关键实现特性
 
-### 关键问题 (需要修复)
-1. **Fish Audio SDK 调用方式**: `new TTSRequest()` 应改为 `TTSRequest()`
-2. **文件路径配置**: 使用相对路径可能导致问题，应使用绝对路径
-3. **环境变量验证**: 模块加载时验证会导致应用无法启动
+### Fish Audio SDK 集成
+- 使用 30秒超时机制防止长时间等待
+- 延迟初始化 Session 避免启动时验证环境变量
+- TTSRequest 正确调用方式 (不用 new)
+- 支持音频格式: MP3, WAV, OPUS
 
-### 组件状态管理
-- 使用 React Hook (useState, useEffect) 进行状态管理
-- 父子组件通过 props 传递数据和回调函数
-- 无全局状态管理库 (适合简单应用)
+### 实际使用统计
+- 通过 `ttsHistory` 表记录每次 TTS 生成
+- 使用 SQL JOIN 查询真实使用次数和最后使用时间
+- 时间戳处理: 数据库返回秒级时间戳，前端需要 *1000 转换为毫秒
+
+### UI/UX 优化
+- 使用 shadcn/ui Dialog 组件替代原生 confirm/alert
+- 自定义对话框居中显示，无浏览器 URL 信息干扰
+- 响应式设计支持多设备访问
 
 ## 开发建议
 
@@ -123,10 +137,37 @@ MAX_FILE_SIZE=50MB
 
 ### 错误处理
 - API Routes 统一错误格式: `{ error: string }`
-- 前端组件使用 try-catch 和 alert 显示错误
-- 后端错误记录到 console
+- 使用自定义 Dialog 组件显示错误，避免使用 alert()
+- 后端错误记录到 console，包含详细调试信息
 
-### 类型安全
+### 类型安全  
 - 完整的 TypeScript 配置
 - Drizzle ORM 自动生成类型
-- Fish Audio SDK 类型定义
+- 前端接口定义包含可选字段 (usageCount?, lastUsedAt?)
+
+## 重要技术细节
+
+### 时间戳转换
+```typescript
+// 数据库返回秒级时间戳，需要转换为毫秒级
+new Date((model.lastUsedAt ? model.lastUsedAt * 1000 : model.createdAt))
+```
+
+### Fish Audio API 调用
+```typescript  
+// 正确的 TTSRequest 调用方式
+const request = TTSRequest({
+  text, reference_id, format, chunk_length, normalize
+});
+```
+
+### 使用统计查询
+```sql
+-- 使用 LEFT JOIN 和聚合函数计算实际使用次数
+SELECT models.*, 
+  COALESCE(COUNT(tts_history.id), 0) as usageCount,
+  MAX(tts_history.createdAt) as lastUsedAt
+FROM models 
+LEFT JOIN tts_history ON models.id = tts_history.modelId
+GROUP BY models.id;
+```

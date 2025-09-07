@@ -42,24 +42,24 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   
-  /* Fish Audio 风格色彩系统 */
-  --color-brand-primary: #3b82f6;
-  --color-brand-secondary: #6366f1;
-  --color-accent-blue: #0ea5e9;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
+  /* Claude 风格色彩系统 */
+  --color-brand-primary: #c96442;
+  --color-brand-secondary: #b8563a;
+  --color-accent-warm: #d97654;
+  --color-success: #16a34a;
+  --color-warning: #ca8a04;
+  --color-error: #dc2626;
   
-  /* 深色主题专用颜色 */
-  --color-dark-bg-primary: #0a0a0a;
-  --color-dark-bg-secondary: #1a1a1a;
-  --color-dark-bg-tertiary: #2a2a2a;
-  --color-dark-surface: #1e1e1e;
-  --color-dark-surface-hover: #2a2a2a;
-  --color-dark-border: rgba(255, 255, 255, 0.1);
-  --color-dark-text-primary: #ffffff;
-  --color-dark-text-secondary: #a1a1aa;
-  --color-dark-text-muted: #71717a;
+  /* 浅色主题专用颜色 */
+  --color-light-bg-primary: #ffffff;
+  --color-light-bg-secondary: #f8fafc;
+  --color-light-bg-tertiary: #f1f5f9;
+  --color-light-surface: #ffffff;
+  --color-light-surface-hover: #f8fafc;
+  --color-light-border: rgba(0, 0, 0, 0.08);
+  --color-light-text-primary: #1e293b;
+  --color-light-text-secondary: #475569;
+  --color-light-text-muted: #64748b;
   
   /* 玻璃态效果 */
   --glass-background: rgba(255, 255, 255, 0.05);
@@ -69,29 +69,29 @@
 
 :root {
   --radius: 0.75rem;
-  /* 深色主题为默认 */
-  --background: var(--color-dark-bg-primary);
-  --foreground: var(--color-dark-text-primary);
-  --card: var(--color-dark-surface);
-  --card-foreground: var(--color-dark-text-primary);
-  --popover: var(--color-dark-surface);
-  --popover-foreground: var(--color-dark-text-primary);
+  /* 浅色主题为默认 */
+  --background: var(--color-light-bg-primary);
+  --foreground: var(--color-light-text-primary);
+  --card: var(--color-light-surface);
+  --card-foreground: var(--color-light-text-primary);
+  --popover: var(--color-light-surface);
+  --popover-foreground: var(--color-light-text-primary);
   --primary: var(--color-brand-primary);
   --primary-foreground: #ffffff;
-  --secondary: var(--color-dark-surface);
-  --secondary-foreground: var(--color-dark-text-primary);
-  --muted: var(--color-dark-bg-tertiary);
-  --muted-foreground: var(--color-dark-text-muted);
+  --secondary: var(--color-light-bg-secondary);
+  --secondary-foreground: var(--color-light-text-primary);
+  --muted: var(--color-light-bg-tertiary);
+  --muted-foreground: var(--color-light-text-muted);
   --accent: var(--color-brand-secondary);
   --accent-foreground: #ffffff;
   --destructive: var(--color-error);
   --destructive-foreground: #ffffff;
-  --border: var(--color-dark-border);
-  --input: var(--color-dark-surface);
+  --border: var(--color-light-border);
+  --input: var(--color-light-surface);
   --ring: var(--color-brand-primary);
   --chart-1: var(--color-brand-primary);
   --chart-2: var(--color-brand-secondary);
-  --chart-3: var(--color-accent-blue);
+  --chart-3: var(--color-accent-warm);
   --chart-4: var(--color-success);
   --chart-5: var(--color-warning);
 }
@@ -117,16 +117,16 @@
   }
   
   ::-webkit-scrollbar-track {
-    background: var(--color-dark-bg-secondary);
+    background: var(--color-light-bg-secondary);
   }
   
   ::-webkit-scrollbar-thumb {
-    background: var(--color-dark-text-muted);
+    background: var(--color-light-text-muted);
     border-radius: 4px;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-dark-text-secondary);
+    background: var(--color-light-text-secondary);
   }
   
   /* 选择文本样式 */
@@ -137,17 +137,15 @@
 }
 
 @layer components {
-  /* 玻璃态卡片 */
+  /* Claude 风格卡片 */
   .glass-card {
-    @apply bg-card/50 backdrop-blur-lg border border-white/10 shadow-xl;
-    background: var(--glass-background);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
+    @apply bg-card border border-border shadow-sm rounded-lg;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   }
   
   /* 导航栏样式 */
   .navbar {
-    @apply bg-background/80 backdrop-blur-md border-b border-white/10 sticky top-0 z-50;
+    @apply bg-background/90 backdrop-blur-sm border-b border-border sticky top-0 z-50;
   }
   
   /* 主要按钮 */
@@ -159,21 +157,21 @@
   
   /* 次要按钮 */
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-white/10;
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border;
     @apply px-6 py-3 rounded-lg font-medium transition-all duration-200;
   }
   
   /* 输入框样式 */
   .input-field {
-    @apply bg-input border border-white/10 text-foreground placeholder-muted-foreground;
-    @apply rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50;
+    @apply bg-input border border-border text-foreground placeholder-muted-foreground;
+    @apply rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary;
     @apply transition-all duration-200;
   }
   
   /* 文本区域 */
   .textarea-field {
-    @apply bg-input border border-white/10 text-foreground placeholder-muted-foreground;
-    @apply rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50;
+    @apply bg-input border border-border text-foreground placeholder-muted-foreground;
+    @apply rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary;
     @apply transition-all duration-200 resize-none;
   }
   
@@ -189,8 +187,8 @@
   
   /* 文件上传区域 */
   .upload-area {
-    @apply border-2 border-dashed border-white/20 rounded-xl p-8 text-center;
-    @apply hover:border-primary/50 hover:bg-primary/5 transition-all duration-300;
+    @apply border-2 border-dashed border-border rounded-xl p-8 text-center;
+    @apply hover:border-primary/70 hover:bg-primary/5 transition-all duration-300;
   }
   
   .upload-area.dragover {
@@ -216,8 +214,8 @@
   
   /* 音频播放器样式 */
   .audio-player {
-    @apply bg-card/50 border border-white/10 rounded-xl p-6;
-    @apply backdrop-blur-sm;
+    @apply bg-card border border-border rounded-xl p-6;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   }
   
   /* 加载动画 */

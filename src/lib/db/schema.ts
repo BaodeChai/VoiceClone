@@ -9,6 +9,8 @@ export const models = sqliteTable('models', {
   fishModelId: text('fish_model_id'), // Fish Audio 返回的模型 ID
   status: text('status').notNull().default('creating'), // creating, ready, failed
   audioPath: text('audio_path'), // 原始音频文件路径
+  audioDuration: integer('audio_duration'), // 音频时长（秒）
+  audioSize: integer('audio_size'), // 音频文件大小（字节）
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });

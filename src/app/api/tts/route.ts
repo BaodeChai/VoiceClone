@@ -10,9 +10,11 @@ import { eq } from 'drizzle-orm';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('TTS request received:', JSON.stringify(body, null, 2));
     const { text, modelId, format = 'mp3' } = body;
     
     if (!text || !modelId) {
+      console.log('TTS validation failed:', { hasText: !!text, hasModelId: !!modelId });
       return NextResponse.json(
         { error: 'Text and modelId are required' },
         { status: 400 }
@@ -27,11 +29,21 @@ export async function POST(request: NextRequest) {
       .limit(1);
     
     if (!model.length || !model[0].fishModelId) {
+      console.log('Model not found or not ready:', { 
+        modelFound: model.length > 0, 
+        hasFishModelId: model.length > 0 && !!model[0].fishModelId 
+      });
       return NextResponse.json(
         { error: 'Model not found or not ready' },
         { status: 404 }
       );
     }
+    
+    console.log('Generating TTS with:', { 
+      text: text.substring(0, 50) + '...', 
+      fishModelId: model[0].fishModelId,
+      format 
+    });
     
     // 生成语音
     const audioBuffer = await generateTTS(
@@ -56,13 +68,17 @@ export async function POST(request: NextRequest) {
       audioFormat: format
     }).returning();
     
-    return NextResponse.json({
+    const result = {
       success: true,
       audioId: ttsRecord.id,
       audioPath: `/api/audio/${ttsRecord.id}`,
       text,
       format
-    });
+    };
+    
+    console.log('TTS generation successful:', result);
+    
+    return NextResponse.json(result);
     
   } catch (error) {
     console.error('TTS generation error:', error);

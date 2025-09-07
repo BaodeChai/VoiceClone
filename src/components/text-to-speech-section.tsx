@@ -159,7 +159,7 @@ export function TextToSpeechSection({ models, onModelDeleted }: TextToSpeechSect
             </div>
             <h3 className="text-lg font-medium text-foreground mb-2">暂无可用的语音模型</h3>
             <p className="text-muted-foreground mb-4">
-              请先切换到"声音克隆"标签页创建您的第一个语音模型
+              请先切换到&ldquo;声音克隆&rdquo;标签页创建您的第一个语音模型
             </p>
             <div className="inline-flex items-center px-4 py-2 bg-muted/50 rounded-lg">
               <AlertCircle className="w-4 h-4 text-warning mr-2" />
@@ -188,8 +188,8 @@ export function TextToSpeechSection({ models, onModelDeleted }: TextToSpeechSect
                       {model.description || '专业语音模型'}
                     </p>
                     <div className="flex items-center mt-2">
-                      <CheckCircle className="w-3 h-3 text-green-500 mr-1" />
-                      <span className="text-xs text-green-600">已训练完成</span>
+                      <CheckCircle className="w-3 h-3 text-success mr-1" />
+                      <span className="text-xs text-success">已训练完成</span>
                     </div>
                   </div>
                   {selectedModelId === model.id && (
@@ -224,7 +224,7 @@ export function TextToSpeechSection({ models, onModelDeleted }: TextToSpeechSect
               <div className="absolute bottom-3 right-3 flex items-center space-x-2">
                 <div className={`text-xs px-2 py-1 rounded ${
                   textLength === 0 ? 'text-muted-foreground' :
-                  isTextValid ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
+                  isTextValid ? 'text-success bg-success/10' : 'text-error bg-error/10'
                 }`}>
                   {textLength}/500
                 </div>
@@ -307,7 +307,7 @@ export function TextToSpeechSection({ models, onModelDeleted }: TextToSpeechSect
             
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <CheckCircle className="w-4 h-4 text-green-500" />
+                <CheckCircle className="w-4 h-4 text-success" />
                 <span>MP3 格式，高质量音频</span>
               </div>
               
@@ -347,15 +347,15 @@ export function TextToSpeechSection({ models, onModelDeleted }: TextToSpeechSect
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      model.status === 'ready' ? 'bg-green-500/10' :
-                      model.status === 'creating' ? 'bg-yellow-500/10' : 'bg-red-500/10'
+                      model.status === 'ready' ? 'bg-success/10' :
+                      model.status === 'creating' ? 'bg-warning/10' : 'bg-error/10'
                     }`}>
                       {model.status === 'ready' ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <CheckCircle className="w-4 h-4 text-success" />
                       ) : model.status === 'creating' ? (
-                        <Clock className="w-4 h-4 text-yellow-500" />
+                        <Clock className="w-4 h-4 text-warning" />
                       ) : (
-                        <AlertCircle className="w-4 h-4 text-red-500" />
+                        <AlertCircle className="w-4 h-4 text-error" />
                       )}
                     </div>
                     <div>

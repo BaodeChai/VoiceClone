@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import I18nProvider from "@/components/i18n-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -85,11 +86,14 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <div id="root" className="relative">
-          {children}
-        </div>
+        <I18nProvider>
+          <div id="root" className="relative">
+            {children}
+          </div>
+        </I18nProvider>
         
         {/* 背景装饰元素 */}
         <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">

@@ -10,7 +10,6 @@ import {
   Upload, 
   FileAudio, 
   CheckCircle, 
-  AlertCircle,
   Clock,
   Music,
   Sparkles,
@@ -299,8 +298,8 @@ export function VoiceCloneSection({ onModelCreated }: VoiceCloneSectionProps) {
             <div className="glass-card p-6 animate-fade-in">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-6 h-6 text-green-500" />
+                  <div className="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-success" />
                   </div>
                   <div>
                     <h4 className="font-medium text-foreground">{uploadedFile.name}</h4>

@@ -6,10 +6,10 @@ import { existsSync } from 'fs';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const modelId = params.id;
+    const { id: modelId } = await params;
     
     if (!modelId) {
       return NextResponse.json(

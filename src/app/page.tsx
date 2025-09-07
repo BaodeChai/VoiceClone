@@ -1,22 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { VoiceCloneSection } from '@/components/voice-clone-section';
-import { TextToSpeechSection } from '@/components/text-to-speech-section';
-import { 
-  Mic, 
-  Waves, 
-  Sparkles, 
-  Volume2, 
-  Download, 
-  Zap, 
-  Shield, 
-  Cpu 
-} from 'lucide-react';
+import Link from 'next/link';
+import Header from '@/components/header';
+import Footer from '@/components/footer';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { RiMicLine, RiVolumeUpLine, RiDatabase2Line, RiCloudLine, RiCpuLine, RiPlayLine, RiEyeLine, RiSoundModuleLine } from 'react-icons/ri';
 
 export default function Home() {
   const [models, setModels] = useState([]);
-  const [activeTab, setActiveTab] = useState<'clone' | 'tts'>('clone');
 
   // 获取模型列表
   const fetchModels = async () => {
@@ -35,208 +28,211 @@ export default function Home() {
     fetchModels();
   }, []);
 
+  const features = [
+    {
+      icon: RiMicLine,
+      title: '声音克隆',
+      description: '上传10-90秒音频样本，创建个人专属声音模型',
+      color: 'text-blue-600'
+    },
+    {
+      icon: RiVolumeUpLine,
+      title: '语音合成',
+      description: '将文本转换为和你的声音极高相似度的语音',
+      color: 'text-green-600'
+    },
+    {
+      icon: RiDatabase2Line,
+      title: '模型管理',
+      description: '管理所有声音模型，查看训练状态和使用情况',
+      color: 'text-purple-600'
+    },
+    {
+      icon: RiCloudLine,
+      title: 'AI Technology',
+      description: '基于先进AI技术，提供工业级声音克隆解决方案',
+      color: 'text-orange-600'
+    }
+  ];
+
+  const stats = [
+    { number: '10,000+', label: '声音模型' },
+    { number: '50,000+', label: '用户使用' },
+    { number: '99.9%', label: '服务可用性' },
+    { number: '< 30s', label: '平均响应时间' }
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* 导航栏 */}
-      <nav className="navbar">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo 区域 */}
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center">
-                <Waves className="w-8 h-8 text-primary" />
-                <span className="ml-3 text-xl font-bold text-foreground">
-                  Fish Audio Clone
-                </span>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20">
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-10"
+          style={{ 
+            backgroundImage: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 800"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:rgb(59,130,246);stop-opacity:0.1" /><stop offset="100%" style="stop-color:rgb(147,51,234);stop-opacity:0.1" /></linearGradient></defs><rect width="1920" height="800" fill="url(%23grad1)" /></svg>')` 
+          }}
+        />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                创造你的
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> 专属声音</span>
+              </h1>
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                基于先进AI技术，只需简单的音频样本，即可创建高质量的个人声音模型，实现文本到语音的完美转换。
+              </p>
+              <div className="flex flex-col sm:flex-row gap-6">
+                <Link href="/clone">
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 px-8 py-6 text-lg font-semibold rounded-xl">
+                    <RiCpuLine className="mr-3 text-xl" />
+                    开始声音克隆
+                  </Button>
+                </Link>
+                <Link href="/synthesis">
+                  <Button variant="outline" size="lg" className="border-2 border-blue-500 text-blue-600 hover:bg-blue-50 px-8 py-6 text-lg font-semibold rounded-xl">
+                    <RiPlayLine className="mr-3 text-xl" />
+                    开始语音合成
+                  </Button>
+                </Link>
               </div>
             </div>
-
-            {/* 导航菜单 */}
-            <div className="hidden md:flex items-center space-x-8">
-              <button 
-                onClick={() => setActiveTab('clone')}
-                className={`tab-button ${activeTab === 'clone' ? 'active' : ''}`}
-              >
-                <Mic className="w-4 h-4 mr-2" />
-                声音克隆
-              </button>
-              <button 
-                onClick={() => setActiveTab('tts')}
-                className={`tab-button ${activeTab === 'tts' ? 'active' : ''}`}
-              >
-                <Volume2 className="w-4 h-4 mr-2" />
-                文本转语音
-              </button>
-            </div>
-
-            {/* 右侧操作区 */}
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-muted-foreground">
-                {models.length} 个模型
+            <div className="relative">
+              <img 
+                src="/studio-bg.jpg"
+                alt="专业录音室 - AI声音克隆技术"
+                className="rounded-2xl shadow-2xl object-cover w-full h-96"
+              />
+              <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-lg p-4 border border-gray-100">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <RiSoundModuleLine className="text-green-600 text-xl" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">AI 驱动</p>
+                    <p className="text-sm text-gray-600">高质量声音克隆</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </nav>
+      </section>
 
-      {/* 主要内容区域 */}
-      <main className="container mx-auto px-6 py-12 max-w-6xl">
-        {/* Hero 区域 */}
-        <div className="text-center mb-16 animate-fade-in">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            <span className="gradient-text">最自然的 AI 语音克隆</span>
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            使用先进的 Fish Audio 技术，轻松创建高质量的声音模型，实现自然流畅的语音合成
-          </p>
+      {/* Stats Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-4xl font-bold text-gray-900 mb-2">{stat.number}</div>
+                <div className="text-gray-600">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">强大的功能特性</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              从声音采集到语音合成的完整解决方案，让AI技术为您的创意赋能
+            </p>
+          </div>
           
-          {/* 功能特点 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
-            <div className="flex flex-col items-center p-6 glass-card hover-lift animate-fade-in">
-              <Sparkles className="w-12 h-12 text-primary mb-4" />
-              <h3 className="text-lg font-semibold mb-2">声音克隆</h3>
-              <p className="text-sm text-muted-foreground text-center">
-                只需上传短音频，即可创建逼真的个人语音模型
-              </p>
-            </div>
-            <div className="flex flex-col items-center p-6 glass-card hover-lift animate-fade-in">
-              <Zap className="w-12 h-12 text-primary mb-4" />
-              <h3 className="text-lg font-semibold mb-2">快速生成</h3>
-              <p className="text-sm text-muted-foreground text-center">
-                高效的AI算法，快速将文本转换为自然语音
-              </p>
-            </div>
-            <div className="flex flex-col items-center p-6 glass-card hover-lift animate-fade-in">
-              <Shield className="w-12 h-12 text-primary mb-4" />
-              <h3 className="text-lg font-semibold mb-2">安全可靠</h3>
-              <p className="text-sm text-muted-foreground text-center">
-                本地处理，保护您的数据隐私和声音安全
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => {
+              const IconComponent = feature.icon;
+              return (
+                <Card key={index} className="text-center hover:shadow-xl transition-shadow cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className={`w-16 h-16 mx-auto mb-6 bg-gray-50 rounded-full flex items-center justify-center ${feature.color}`}>
+                      <IconComponent className="text-2xl" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
+                    <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
+      </section>
 
-        {/* 标签页导航 - 移动端 */}
-        <div className="md:hidden flex justify-center mb-8">
-          <div className="glass-card p-2 inline-flex space-x-2">
-            <button 
-              onClick={() => setActiveTab('clone')}
-              className={`tab-button ${activeTab === 'clone' ? 'active' : ''}`}
-            >
-              <Mic className="w-4 h-4 mr-2" />
-              声音克隆
-            </button>
-            <button 
-              onClick={() => setActiveTab('tts')}
-              className={`tab-button ${activeTab === 'tts' ? 'active' : ''}`}
-            >
-              <Volume2 className="w-4 h-4 mr-2" />
-              文本转语音
-            </button>
+      {/* How It Works */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">如何工作</h2>
+            <p className="text-xl text-gray-600">简单三步，即可拥有专属数字声音</p>
           </div>
-        </div>
-
-        {/* 主要功能区域 */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* 主要内容区域 */}
-          <div className="lg:col-span-3">
-            <div className="glass-card p-8 animate-slide-up">
-              {activeTab === 'clone' ? (
-                <div>
-                  <div className="flex items-center mb-6">
-                    <Mic className="w-6 h-6 text-primary mr-3" />
-                    <h2 className="text-2xl font-bold">创建声音模型</h2>
-                  </div>
-                  <VoiceCloneSection onModelCreated={fetchModels} />
-                </div>
-              ) : (
-                <div>
-                  <div className="flex items-center mb-6">
-                    <Volume2 className="w-6 h-6 text-primary mr-3" />
-                    <h2 className="text-2xl font-bold">文本转语音</h2>
-                  </div>
-                  <TextToSpeechSection models={models} onModelDeleted={fetchModels} />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 侧边栏 */}
-          <div className="lg:col-span-1">
-            <div className="glass-card p-6 animate-slide-up">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <Cpu className="w-5 h-5 text-primary mr-2" />
-                我的模型
-              </h3>
-              
-              {models.length === 0 ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Waves className="w-8 h-8 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    还没有创建任何模型
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    开始上传音频来创建您的第一个声音模型
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {models.slice(0, 5).map((model: any) => (
-                    <div key={model.id} className="p-3 bg-card/30 rounded-lg border border-white/5 hover:bg-card/50 transition-all duration-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium truncate">{model.title}</h4>
-                          <div className="flex items-center mt-1">
-                            <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
-                              model.status === 'ready' ? 'bg-green-400' :
-                              model.status === 'creating' ? 'bg-yellow-400' : 'bg-red-400'
-                            }`} />
-                            <span className="text-xs text-muted-foreground">
-                              {model.status === 'ready' ? '已完成' :
-                               model.status === 'creating' ? '创建中' : '失败'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {models.length > 5 && (
-                    <div className="text-center">
-                      <button className="text-xs text-primary hover:text-primary/80">
-                        查看全部 {models.length} 个模型
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* 使用提示 */}
-            <div className="glass-card p-6 mt-6 animate-slide-up">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <Download className="w-5 h-5 text-primary mr-2" />
-                使用提示
-              </h3>
-              <div className="space-y-3 text-sm text-muted-foreground">
-                <div className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p>上传 10-90 秒的高质量音频文件</p>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p>建议使用清晰、无背景噪音的录音</p>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p>模型训练完成后即可生成语音</p>
-                </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-20 h-20 mx-auto mb-6 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-2xl font-bold text-blue-600">1</span>
               </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">上传音频样本</h3>
+              <p className="text-gray-600">上传10-90秒的清晰音频文件，支持MP3、WAV、M4A格式</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
+                <span className="text-2xl font-bold text-green-600">2</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">AI 模型训练</h3>
+              <p className="text-gray-600">系统自动分析音频特征，训练成专属你的声音克隆模型</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-20 h-20 mx-auto mb-6 bg-purple-100 rounded-full flex items-center justify-center">
+                <span className="text-2xl font-bold text-purple-600">3</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">生成语音</h3>
+              <p className="text-gray-600">输入文本内容，即可生成极高相似度的个性化语音</p>
             </div>
           </div>
         </div>
-      </main>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-4xl font-bold text-white mb-6">准备好创造你的专属声音了吗？</h2>
+          <p className="text-xl text-blue-100 mb-8">
+            加入数万用户的行列，体验最先进的AI声音克隆技术
+          </p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <Link href="/clone">
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg font-semibold rounded-xl"
+              >
+                <RiMicLine className="mr-3 text-xl" />
+                立即开始
+              </Button>
+            </Link>
+            <Link href="/system">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-2 border-white text-white hover:bg-white hover:text-blue-600 bg-transparent px-8 py-6 text-lg font-semibold rounded-xl"
+              >
+                <RiEyeLine className="mr-3 text-xl" />
+                查看模型
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }
