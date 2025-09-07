@@ -3,7 +3,8 @@ import { existsSync } from 'fs';
 import path from 'path';
 import { createId } from '@paralleldrive/cuid2';
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
+// 在云端环境使用 /tmp 目录，本地开发使用 uploads 目录
+const UPLOAD_DIR = process.env.UPLOAD_DIR || (process.env.NODE_ENV === 'production' ? '/tmp' : path.join(process.cwd(), 'uploads'));
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 // 支持的音频格式
