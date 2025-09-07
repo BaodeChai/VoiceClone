@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     console.log('Audio metadata:', audioMetadata);
     
     // 创建数据库记录
-    const [newModel] = await db.insert(schema.models).values({
+    const [newModel] = await (db as any).insert(schema.models).values({
       title,
       description,
       audioPath,
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       );
       
       // 更新数据库记录
-      await db.update(schema.models)
+      await (db as any).update(schema.models)
         .set({
           fishModelId: fishModel.id,
           status: 'ready',
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       
     } catch (fishError) {
       // Fish Audio API 调用失败，更新状态为失败
-      await db.update(schema.models)
+      await (db as any).update(schema.models)
         .set({
           status: 'failed',
           updatedAt: new Date()

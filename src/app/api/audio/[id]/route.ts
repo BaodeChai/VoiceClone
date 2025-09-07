@@ -13,7 +13,7 @@ export async function GET(
     const { id } = await params;
     
     // 查找音频记录
-    const audioRecord = await db
+    const audioRecord = await (db as any)
       .select()
       .from(schema.ttsHistory)
       .where(eq(schema.ttsHistory.id, id))

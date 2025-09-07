@@ -1,0 +1,58 @@
+// SQLite imports
+import { sqliteTable, text as sqliteText, integer as sqliteInteger } from 'drizzle-orm/sqlite-core';
+// PostgreSQL imports  
+import { pgTable, text as pgText, integer as pgInteger, timestamp } from 'drizzle-orm/pg-core';
+import { createId } from '@paralleldrive/cuid2';
+
+const isProduction = process.env.NODE_ENV === 'production' && process.env.POSTGRES_URL;
+
+// 声音模型表
+export const models = isProduction 
+  ? pgTable('models', {
+      id: pgText('id').primaryKey().$defaultFn(() => createId()),
+      title: pgText('title').notNull(),
+      description: pgText('description'),
+      fishModelId: pgText('fish_model_id'), // Fish Audio 返回的模型 ID
+      status: pgText('status').notNull().default('creating'), // creating, ready, failed
+      audioPath: pgText('audio_path'), // 原始音频文件路径
+      audioDuration: pgInteger('audio_duration'), // 音频时长（秒）
+      audioSize: pgInteger('audio_size'), // 音频文件大小（字节）
+      createdAt: timestamp('created_at').defaultNow(),
+      updatedAt: timestamp('updated_at').defaultNow(),
+    })
+  : sqliteTable('models', {
+      id: sqliteText('id').primaryKey().$defaultFn(() => createId()),
+      title: sqliteText('title').notNull(),
+      description: sqliteText('description'),
+      fishModelId: sqliteText('fish_model_id'), // Fish Audio 返回的模型 ID
+      status: sqliteText('status').notNull().default('creating'), // creating, ready, failed
+      audioPath: sqliteText('audio_path'), // 原始音频文件路径
+      audioDuration: sqliteInteger('audio_duration'), // 音频时长（秒）
+      audioSize: sqliteInteger('audio_size'), // 音频文件大小（字节）
+      createdAt: sqliteInteger('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+      updatedAt: sqliteInteger('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+    });
+
+// TTS 生成历史记录表
+export const ttsHistory = isProduction
+  ? pgTable('tts_history', {
+      id: pgText('id').primaryKey().$defaultFn(() => createId()),
+      modelId: pgText('model_id').references(() => models.id, { onDelete: 'cascade' }),
+      text: pgText('text').notNull(),
+      audioPath: pgText('audio_path').notNull(), // 生成的音频文件路径
+      audioFormat: pgText('audio_format').notNull().default('mp3'), // mp3, wav, opus
+      createdAt: timestamp('created_at').defaultNow(),
+    })
+  : sqliteTable('tts_history', {
+      id: sqliteText('id').primaryKey().$defaultFn(() => createId()),
+      modelId: sqliteText('model_id').references(() => models.id, { onDelete: 'cascade' }),
+      text: sqliteText('text').notNull(),
+      audioPath: sqliteText('audio_path').notNull(), // 生成的音频文件路径
+      audioFormat: sqliteText('audio_format').notNull().default('mp3'), // mp3, wav, opus
+      createdAt: sqliteInteger('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+    });
+
+export type Model = typeof models.$inferSelect;
+export type NewModel = typeof models.$inferInsert;
+export type TTSHistory = typeof ttsHistory.$inferSelect;
+export type NewTTSHistory = typeof ttsHistory.$inferInsert;

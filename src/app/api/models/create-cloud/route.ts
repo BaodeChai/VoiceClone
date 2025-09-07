@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const estimatedDuration = Math.round(size / 16000); // 假设 16kbps
     
     // 创建数据库记录
-    const [newModel] = await db.insert(schema.models).values({
+    const [newModel] = await (db as any).insert(schema.models).values({
       title,
       description: description || '',
       status: 'creating',
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       console.log('Fish Audio model created:', fishModelId);
       
       // 更新模型状态
-      await db
+      await (db as any)
         .update(schema.models)
         .set({ 
           fishModelId,
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       console.error('Fish Audio model creation failed:', fishError);
       
       // 更新模型状态为失败
-      await db
+      await (db as any)
         .update(schema.models)
         .set({ status: 'failed' })
         .where(eq(schema.models.id, newModel.id));

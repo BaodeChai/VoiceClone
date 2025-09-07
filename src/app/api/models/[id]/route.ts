@@ -19,7 +19,7 @@ export async function DELETE(
     }
 
     // 查找要删除的模型
-    const [model] = await db
+    const [model] = await (db as any)
       .select()
       .from(schema.models)
       .where(eq(schema.models.id, modelId));
@@ -54,7 +54,7 @@ export async function DELETE(
     }
 
     // 从数据库删除模型记录
-    await db.delete(schema.models).where(eq(schema.models.id, modelId));
+    await (db as any).delete(schema.models).where(eq(schema.models.id, modelId));
 
     return NextResponse.json({
       success: true,
@@ -88,7 +88,7 @@ export async function GET(
     }
 
     // 查找指定模型
-    const [model] = await db
+    const [model] = await (db as any)
       .select()
       .from(schema.models)
       .where(eq(schema.models.id, modelId));

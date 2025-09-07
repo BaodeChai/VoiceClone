@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
     
     // 获取模型信息
-    const model = await db
+    const model = await (db as any)
       .select()
       .from(schema.models)
       .where(eq(schema.models.id, modelId))
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     await writeFile(filePath, audioBuffer);
     
     // 保存到历史记录
-    const [ttsRecord] = await db.insert(schema.ttsHistory).values({
+    const [ttsRecord] = await (db as any).insert(schema.ttsHistory).values({
       modelId,
       text,
       audioPath: filePath,

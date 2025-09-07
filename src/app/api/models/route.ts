@@ -5,7 +5,7 @@ import { desc, sql } from 'drizzle-orm';
 export async function GET() {
   try {
     // 获取模型及其使用统计
-    const models = await db
+    const models = await (db as any)
       .select({
         id: schema.models.id,
         title: schema.models.title,

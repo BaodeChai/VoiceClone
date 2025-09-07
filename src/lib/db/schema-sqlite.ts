@@ -1,7 +1,7 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { createId } from '@paralleldrive/cuid2';
 
-// 声音模型表
+// 声音模型表 (SQLite)
 export const models = sqliteTable('models', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   title: text('title').notNull(),
@@ -15,7 +15,7 @@ export const models = sqliteTable('models', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
-// TTS 生成历史记录表
+// TTS 生成历史记录表 (SQLite)
 export const ttsHistory = sqliteTable('tts_history', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   modelId: text('model_id').references(() => models.id, { onDelete: 'cascade' }),
