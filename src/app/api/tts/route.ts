@@ -52,11 +52,19 @@ export async function POST(request: NextRequest) {
       format as 'mp3' | 'wav' | 'opus'
     );
     
-    // 保存生成的音频文件
-    await ensureUploadDir();
+    // 保存生成的音频文件 - 生产环境使用 /tmp 目录
     const fileName = `tts_${createId()}.${format}`;
-    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
-    const filePath = path.join(uploadDir, fileName);
+    let filePath: string;
+    
+    if (process.env.NODE_ENV === 'production') {
+      // Vercel 生产环境，使用 /tmp 目录
+      filePath = path.join('/tmp', fileName);
+    } else {
+      // 本地开发环境
+      await ensureUploadDir();
+      const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
+      filePath = path.join(uploadDir, fileName);
+    }
     
     await writeFile(filePath, audioBuffer);
     
