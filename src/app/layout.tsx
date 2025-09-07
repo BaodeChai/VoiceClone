@@ -11,14 +11,14 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Fish Audio Clone - 最自然的 AI 语音克隆",
-    template: "%s | Fish Audio Clone"
+    default: "VoiceClone-最自然的AI语言克隆",
+    template: "%s | VoiceClone"
   },
-  description: "使用先进的 Fish Audio 技术，轻松创建高质量的声音模型，实现自然流畅的语音合成。支持声音克隆和文本转语音功能。",
-  keywords: ["AI语音", "声音克隆", "文本转语音", "TTS", "Fish Audio", "语音合成", "人工智能"],
-  authors: [{ name: "Fish Audio Clone Team" }],
-  creator: "Fish Audio Clone",
-  publisher: "Fish Audio Clone",
+  description: "使用先进的 AI 技术，轻松创建高质量的声音模型，实现自然流畅的语音合成。支持声音克隆和文本转语音功能。",
+  keywords: ["AI语音", "声音克隆", "文本转语音", "TTS", "AI", "语音合成", "人工智能"],
+  authors: [{ name: "VoiceClone Team" }],
+  creator: "VoiceClone",
+  publisher: "VoiceClone",
   robots: {
     index: true,
     follow: true,
@@ -27,22 +27,22 @@ export const metadata: Metadata = {
     type: "website",
     locale: "zh_CN",
     url: "https://voice-clone.app",
-    title: "Fish Audio Clone - 最自然的 AI 语音克隆",
-    description: "使用先进的 Fish Audio 技术，轻松创建高质量的声音模型，实现自然流畅的语音合成",
-    siteName: "Fish Audio Clone",
+    title: "VoiceClone - 最自然的 AI 语音克隆",
+    description: "使用先进的 AI 技术，轻松创建高质量的声音模型，实现自然流畅的语音合成",
+    siteName: "VoiceClone",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Fish Audio Clone - AI语音克隆平台",
+        alt: "VoiceClone - AI语音克隆平台",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fish Audio Clone - 最自然的 AI 语音克隆",
-    description: "使用先进的 Fish Audio 技术，轻松创建高质量的声音模型",
+    title: "VoiceClone - 最自然的 AI 语音克隆",
+    description: "使用先进的 AI 技术，轻松创建高质量的声音模型",
     images: ["/og-image.png"],
   },
   icons: {
