@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir, unlink } from 'fs/promises';
+import { writeFile, mkdir, unlink, readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { db, schema } from '@/lib/db';
+import { eq } from 'drizzle-orm';
 import { createFishModel } from '@/lib/fish-audio';
 import path from 'path';
 import { createId } from '@paralleldrive/cuid2';
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
       size: body.size
     });
     
-    const { title, description, fileData, originalName, size, type } = body;
+    const { title, description, fileData, originalName, size } = body;
     
     if (!title || !fileData) {
       return NextResponse.json(
@@ -65,7 +66,10 @@ export async function POST(request: NextRequest) {
     // 使用临时文件创建 Fish Audio 模型
     try {
       console.log('Creating Fish Audio model...');
-      const fishModelId = await createFishModel(tempFilePath, title);
+      // 读取临时文件为 Buffer
+      const audioBuffer = await readFile(tempFilePath);
+      const fishModel = await createFishModel(title, description || '', audioBuffer);
+      const fishModelId = fishModel.id;
       console.log('Fish Audio model created:', fishModelId);
       
       // 更新模型状态
