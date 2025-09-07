@@ -6,9 +6,9 @@ import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { formatFileSize, formatDuration } from '@/lib/audio-format';
-import { RiCpuLine, RiPlayLine, RiDeleteBinLine, RiAddLine, RiCheckLine, RiTimeLine, RiCloseLine } from 'react-icons/ri';
+import { RiCpuLine, RiDeleteBinLine, RiAddLine, RiCheckLine, RiTimeLine, RiCloseLine } from 'react-icons/ri';
 
 interface VoiceModel {
   id: string;
@@ -112,18 +112,6 @@ export default function SystemPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ready':
-        return 'bg-green-100 text-green-800';
-      case 'creating':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -190,7 +178,7 @@ export default function SystemPage() {
               
               {/* 表格内容 */}
               <div className="divide-y divide-gray-200">
-                {models.map((model, index) => (
+                {models.map((model) => (
                   <div key={model.id} className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
                     {/* 模型信息 */}
                     <div className="col-span-3">
@@ -319,7 +307,7 @@ export default function SystemPage() {
           <DialogHeader>
             <DialogTitle>确认删除</DialogTitle>
             <DialogDescription>
-              确定要删除模型 "{modelToDelete?.title}" 吗？此操作无法撤销。
+              确定要删除模型 &ldquo;{modelToDelete?.title}&rdquo; 吗？此操作无法撤销。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

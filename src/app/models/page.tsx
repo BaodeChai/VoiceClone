@@ -6,7 +6,7 @@ import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { formatFileSize, formatDuration } from '@/lib/audio-format';
 
 interface VoiceModel {
@@ -85,12 +85,6 @@ export default function ModelsPage() {
     }
   };
 
-  // 播放模型示例音频
-  const handlePlaySample = (model: VoiceModel) => {
-    // 这里可以播放模型的示例音频
-    console.log('Playing sample for model:', model.title);
-    alert('播放功能将在后续版本中实现');
-  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -312,7 +306,7 @@ export default function ModelsPage() {
           <DialogHeader>
             <DialogTitle>确认删除</DialogTitle>
             <DialogDescription>
-              确定要删除模型 "{modelToDelete?.title}" 吗？此操作无法撤销。
+              确定要删除模型 &ldquo;{modelToDelete?.title}&rdquo; 吗？此操作无法撤销。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

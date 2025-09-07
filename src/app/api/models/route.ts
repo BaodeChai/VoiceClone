@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db, schema } from '@/lib/db';
-import { desc, sql, count, max } from 'drizzle-orm';
+import { desc, sql } from 'drizzle-orm';
 
 export async function GET() {
   try {

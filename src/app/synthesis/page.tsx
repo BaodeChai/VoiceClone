@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import Header from '@/components/header';
@@ -16,7 +16,7 @@ interface VoiceModel {
   createdAt: string;
 }
 
-export default function VoiceSynthesisPage() {
+function VoiceSynthesisContent() {
   const { t } = useTranslation();
   const searchParams = useSearchParams();
   const [selectedModel, setSelectedModel] = useState('');
@@ -27,7 +27,7 @@ export default function VoiceSynthesisPage() {
   const [models, setModels] = useState<VoiceModel[]>([]);
 
   // 获取模型列表
-  const fetchModels = async () => {
+  const fetchModels = useCallback(async () => {
     try {
       const response = await fetch('/api/models');
       const data = await response.json();
@@ -44,11 +44,11 @@ export default function VoiceSynthesisPage() {
     } catch (error) {
       console.error('Failed to fetch models:', error);
     }
-  };
+  }, [searchParams]);
 
   useEffect(() => {
     fetchModels();
-  }, [searchParams]);
+  }, [searchParams, fetchModels]);
 
   const handleGenerate = async () => {
     if (!selectedModel || !inputText.trim()) {
@@ -295,5 +295,13 @@ export default function VoiceSynthesisPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function VoiceSynthesisPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <VoiceSynthesisContent />
+    </Suspense>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { RiMicLine, RiVolumeUpLine, RiDatabase2Line, RiCloudLine, RiCpuLine, RiPlayLine, RiEyeLine, RiSoundModuleLine } from 'react-icons/ri';
 
 export default function Home() {
-  const [models, setModels] = useState([]);
+  const [, setModels] = useState([]);
 
   // 获取模型列表
   const fetchModels = async () => {
@@ -100,10 +101,13 @@ export default function Home() {
               </div>
             </div>
             <div className="relative">
-              <img 
+              <Image 
                 src="/studio-bg.jpg"
                 alt="专业录音室 - AI声音克隆技术"
                 className="rounded-2xl shadow-2xl object-cover w-full h-96"
+                width={800}
+                height={384}
+                priority
               />
               <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-lg p-4 border border-gray-100">
                 <div className="flex items-center space-x-3">
