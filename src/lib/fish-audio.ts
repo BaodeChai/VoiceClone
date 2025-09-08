@@ -177,7 +177,10 @@ export async function deleteFishModel(modelId: string): Promise<void> {
 export async function debugFishModels() {
   try {
     const session = createFishSession();
-    const models = await session.listModels();
+    const response = await session.listModels();
+    
+    // Fish Audio SDK返回的是分页响应，需要提取data数组
+    const models = Array.isArray(response) ? response : (response as { data?: unknown[] }).data || [];
     
     console.log('=== Fish Audio Models Debug Info ===');
     console.log(`Total models found: ${models.length}`);
@@ -185,13 +188,20 @@ export async function debugFishModels() {
     if (models.length === 0) {
       console.log('No models found in Fish Audio account');
     } else {
-      models.forEach((model, index) => {
+      models.forEach((model: unknown, index: number) => {
+        const modelData = model as {
+          id?: string;
+          title?: string;
+          description?: string;
+          created_at?: string;
+          status?: string;
+        };
         console.log(`Model ${index + 1}:`, {
-          id: model.id,
-          title: model.title || 'No title',
-          description: model.description || 'No description',
-          created_at: model.created_at || 'Unknown',
-          status: model.status || 'Unknown'
+          id: modelData.id,
+          title: modelData.title || 'No title',
+          description: modelData.description || 'No description',
+          created_at: modelData.created_at || 'Unknown',
+          status: modelData.status || 'Unknown'
         });
       });
     }

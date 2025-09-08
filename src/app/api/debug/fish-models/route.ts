@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { debugFishModels, getFishModels } from '@/lib/fish-audio';
+import { NextResponse } from 'next/server';
+import { debugFishModels } from '@/lib/fish-audio';
 import { db, schema } from '@/lib/db';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log('=== Fish Audio Debug API Called ===');
     
@@ -12,18 +12,21 @@ export async function GET(request: NextRequest) {
     // 获取本地数据库中的模型记录
     const localModels = await db.select().from(schema.models);
     
+    // 确保fishResult.models是数组
+    const fishModels = Array.isArray(fishResult.models) ? fishResult.models : [];
+    
     // 分析数据一致性
     const analysis = {
       localModelsCount: localModels.length,
       fishModelsCount: fishResult.count,
-      localModels: localModels.map(model => ({
+      localModels: localModels.map((model: any) => ({
         id: model.id,
         title: model.title,
         fishModelId: model.fishModelId,
         status: model.status,
         createdAt: model.createdAt
       })),
-      fishModels: fishResult.models.map(model => ({
+      fishModels: fishModels.map((model: any) => ({
         id: model.id,
         title: model.title,
         description: model.description,
@@ -31,19 +34,19 @@ export async function GET(request: NextRequest) {
         status: model.status
       })),
       consistency: {
-        orphanedLocalModels: [],
-        orphanedFishModels: []
+        orphanedLocalModels: [] as any[],
+        orphanedFishModels: [] as any[]
       }
     };
     
     // 检查数据一致性
-    const localFishIds = localModels.map(m => m.fishModelId).filter(Boolean);
-    const fishIds = fishResult.models.map(m => m.id);
+    const localFishIds = localModels.map((m: any) => m.fishModelId).filter(Boolean);
+    const fishIds = fishModels.map((m: any) => m.id);
     
     // 找出本地有但Fish Audio没有的模型（孤儿本地模型）
-    analysis.consistency.orphanedLocalModels = localModels.filter(local => 
+    analysis.consistency.orphanedLocalModels = localModels.filter((local: any) => 
       local.fishModelId && !fishIds.includes(local.fishModelId)
-    ).map(model => ({
+    ).map((model: any) => ({
       localId: model.id,
       title: model.title,
       fishModelId: model.fishModelId,
@@ -51,9 +54,9 @@ export async function GET(request: NextRequest) {
     }));
     
     // 找出Fish Audio有但本地没有的模型（孤儿Fish模型）
-    analysis.consistency.orphanedFishModels = fishResult.models.filter(fish => 
+    analysis.consistency.orphanedFishModels = fishModels.filter((fish: any) => 
       !localFishIds.includes(fish.id)
-    ).map(model => ({
+    ).map((model: any) => ({
       fishId: model.id,
       title: model.title,
       description: model.description,

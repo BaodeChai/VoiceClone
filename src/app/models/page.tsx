@@ -22,6 +22,46 @@ interface VoiceModel {
   lastUsedAt?: number;
 }
 
+interface DebugLocalModel {
+  localId: string;
+  title: string;
+  fishModelId: string;
+  status: string;
+}
+
+interface DebugFishModel {
+  fishId: string;
+  title: string;
+  description: string;
+  created_at: string;
+}
+
+interface DebugConsistency {
+  orphanedLocalModels: DebugLocalModel[];
+  orphanedFishModels: DebugFishModel[];
+}
+
+interface LocalModelInfo {
+  id: string;
+  title: string;
+  fishModelId: string | null;
+  status: string;
+}
+
+interface FishModelInfo {
+  id: string;
+  title: string;
+  status: string;
+}
+
+interface DebugResult {
+  localModelsCount: number;
+  fishModelsCount: number;
+  localModels: LocalModelInfo[];
+  fishModels: FishModelInfo[];
+  consistency: DebugConsistency;
+}
+
 export default function ModelsPage() {
   const { t } = useTranslation();
   const [models, setModels] = useState<VoiceModel[]>([]);
@@ -31,7 +71,7 @@ export default function ModelsPage() {
   const [modelToDelete, setModelToDelete] = useState<{id: string, title: string} | null>(null);
   const [debugLoading, setDebugLoading] = useState(false);
   const [debugDialogOpen, setDebugDialogOpen] = useState(false);
-  const [debugResult, setDebugResult] = useState<any>(null);
+  const [debugResult, setDebugResult] = useState<DebugResult | null>(null);
 
 
   // 获取模型列表
@@ -547,7 +587,7 @@ export default function ModelsPage() {
                       这些模型在本地数据库中存在，但Fish Audio云端已不存在：
                     </p>
                     <div className="space-y-1">
-                      {debugResult.consistency.orphanedLocalModels.map((model: any, index: number) => (
+                      {debugResult.consistency.orphanedLocalModels.map((model, index: number) => (
                         <div key={index} className="text-sm bg-white p-2 rounded border">
                           <span className="font-medium">{model.title}</span> 
                           <span className="text-gray-500 ml-2">(ID: {model.fishModelId})</span>
@@ -566,7 +606,7 @@ export default function ModelsPage() {
                       这些模型在Fish Audio云端存在，但本地数据库中没有记录：
                     </p>
                     <div className="space-y-1">
-                      {debugResult.consistency.orphanedFishModels.map((model: any, index: number) => (
+                      {debugResult.consistency.orphanedFishModels.map((model, index: number) => (
                         <div key={index} className="text-sm bg-white p-2 rounded border">
                           <span className="font-medium">{model.title || '未命名'}</span>
                           <span className="text-gray-500 ml-2">(ID: {model.fishId})</span>
@@ -595,7 +635,7 @@ export default function ModelsPage() {
                   <div>
                     <h4 className="font-medium text-blue-800 mb-2">本地数据库模型</h4>
                     <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {debugResult.localModels.map((model: any, index: number) => (
+                      {debugResult.localModels.map((model, index: number) => (
                         <div key={index} className="text-sm p-2 bg-blue-50 rounded">
                           <div className="font-medium">{model.title}</div>
                           <div className="text-gray-600 text-xs">
@@ -613,7 +653,7 @@ export default function ModelsPage() {
                   <div>
                     <h4 className="font-medium text-green-800 mb-2">Fish Audio云端模型</h4>
                     <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {debugResult.fishModels.map((model: any, index: number) => (
+                      {debugResult.fishModels.map((model, index: number) => (
                         <div key={index} className="text-sm p-2 bg-green-50 rounded">
                           <div className="font-medium">{model.title || '未命名'}</div>
                           <div className="text-gray-600 text-xs">
