@@ -468,6 +468,7 @@ export default function ModelsPage() {
                           {(() => {
                             try {
                               return new Date(model.createdAt).toLocaleString('zh-CN', {
+                                year: 'numeric',
                                 month: '2-digit',
                                 day: '2-digit',
                                 hour: '2-digit',
@@ -493,8 +494,11 @@ export default function ModelsPage() {
                                 try {
                                   const lastUsed = model.lastUsedAt * 1000;
                                   return new Date(lastUsed).toLocaleString('zh-CN', {
+                                    year: 'numeric',
                                     month: '2-digit',
-                                    day: '2-digit'
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
                                   });
                                 } catch {
                                   return '从未使用';
