@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
@@ -29,39 +29,10 @@ export default function ModelsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [modelToDelete, setModelToDelete] = useState<{id: string, title: string} | null>(null);
-  const [playingModelId, setPlayingModelId] = useState<string | null>(null);
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
-  const [audioAvailability, setAudioAvailability] = useState<Record<string, boolean>>({});
 
-  // 检查音频文件可用性
-  const checkAudioAvailability = useCallback(async (models: VoiceModel[]) => {
-    const availability: Record<string, boolean> = {};
-    
-    for (const model of models) {
-      if (model.status === 'ready' && model.audioPath) {
-        try {
-          const response = await fetch(`/api/models/audio/check/${model.id}`);
-          const data = await response.json();
-          availability[model.id] = data.available;
-          
-          // 如果是云环境且文件不可用，记录信息
-          if (data.isCloudEnvironment && !data.available) {
-            console.log(`Audio file not available for model ${model.id} in cloud environment`);
-          }
-        } catch (error) {
-          console.error(`Failed to check audio availability for model ${model.id}:`, error);
-          availability[model.id] = false;
-        }
-      } else {
-        availability[model.id] = false;
-      }
-    }
-    
-    setAudioAvailability(availability);
-  }, []);
 
   // 获取模型列表
-  const fetchModels = useCallback(async () => {
+  const fetchModels = async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/models');
@@ -88,9 +59,6 @@ export default function ModelsPage() {
           lastUsedAt: model.lastUsedAt || null
         }));
         setModels(safeModels);
-        
-        // 检查音频文件可用性
-        checkAudioAvailability(safeModels);
       } else {
         console.error('Invalid response format:', data);
         throw new Error('Invalid response format');
@@ -102,22 +70,12 @@ export default function ModelsPage() {
     } finally {
       setLoading(false);
     }
-  }, [checkAudioAvailability]);
+  };
 
   useEffect(() => {
     fetchModels();
-  }, [fetchModels]);
+  }, []);
 
-  // 清理音频播放器
-  useEffect(() => {
-    return () => {
-      if (currentAudio) {
-        currentAudio.pause();
-        setCurrentAudio(null);
-        setPlayingModelId(null);
-      }
-    };
-  }, [currentAudio]);
 
   // 打开删除确认对话框
   const handleDeleteClick = (modelId: string, modelTitle: string) => {
@@ -154,58 +112,6 @@ export default function ModelsPage() {
     }
   };
 
-  // 播放/停止原音频
-  const handlePlayPause = async (modelId: string) => {
-    try {
-      // 如果正在播放同一个模型的音频，则停止播放
-      if (playingModelId === modelId && currentAudio) {
-        currentAudio.pause();
-        setPlayingModelId(null);
-        setCurrentAudio(null);
-        return;
-      }
-
-      // 如果有其他音频正在播放，先停止
-      if (currentAudio) {
-        currentAudio.pause();
-      }
-
-      // 创建新的音频实例
-      const audio = new Audio(`/api/models/audio/${modelId}`);
-      
-      // 设置音频事件监听器
-      audio.onloadstart = () => {
-        console.log('开始加载音频...');
-      };
-      
-      audio.oncanplay = () => {
-        console.log('音频可以开始播放');
-      };
-      
-      audio.onended = () => {
-        setPlayingModelId(null);
-        setCurrentAudio(null);
-      };
-      
-      audio.onerror = (e) => {
-        console.error('音频播放失败:', e);
-        alert('音频播放失败，请检查文件是否存在');
-        setPlayingModelId(null);
-        setCurrentAudio(null);
-      };
-
-      // 开始播放
-      await audio.play();
-      setPlayingModelId(modelId);
-      setCurrentAudio(audio);
-
-    } catch (error) {
-      console.error('播放音频时出错:', error);
-      alert('播放失败，请重试');
-      setPlayingModelId(null);
-      setCurrentAudio(null);
-    }
-  };
 
 
   const getStatusIcon = (status: string) => {
@@ -372,25 +278,6 @@ export default function ModelsPage() {
                     
                     {/* 操作 */}
                     <div className="col-span-2 flex items-center space-x-2">
-                      {model.status === 'ready' && model.audioPath && audioAvailability[model.id] && (
-                        <Button
-                          variant="ghost"
-                          size="default"
-                          onClick={() => handlePlayPause(model.id)}
-                          className={`w-10 h-10 p-0 ${
-                            playingModelId === model.id 
-                              ? 'text-green-600 hover:text-green-700 hover:bg-green-50' 
-                              : 'text-gray-600 hover:text-gray-700 hover:bg-gray-50'
-                          }`}
-                          title="播放/停止原音频"
-                        >
-                          <i className={`text-lg ${
-                            playingModelId === model.id 
-                              ? 'ri-pause-line' 
-                              : 'ri-play-line'
-                          }`}></i>
-                        </Button>
-                      )}
                       {model.status === 'ready' && (
                         <Button 
                           variant="outline" 
@@ -513,25 +400,6 @@ export default function ModelsPage() {
                     {/* 操作按钮 */}
                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                       <div className="flex items-center space-x-2">
-                        {model.status === 'ready' && model.audioPath && audioAvailability[model.id] && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handlePlayPause(model.id)}
-                            className={`${
-                              playingModelId === model.id 
-                                ? 'text-green-600 hover:text-green-700 hover:bg-green-50' 
-                                : 'text-gray-600 hover:text-gray-700 hover:bg-gray-50'
-                            }`}
-                            title="播放/停止原音频"
-                          >
-                            <i className={`text-lg ${
-                              playingModelId === model.id 
-                                ? 'ri-pause-line' 
-                                : 'ri-play-line'
-                            }`}></i>
-                          </Button>
-                        )}
                         <Button
                           variant="ghost"
                           size="sm"
