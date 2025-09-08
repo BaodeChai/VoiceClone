@@ -45,7 +45,7 @@ export default function SystemPage() {
       
       if (data.success && Array.isArray(data.models)) {
         // 确保每个模型都有必需的字段
-        const safeModels = data.models.map((model: any) => ({
+        const safeModels = data.models.map((model: VoiceModel) => ({
           id: model.id || '',
           title: model.title || '未命名模型',
           status: model.status || 'unknown',
@@ -239,7 +239,7 @@ export default function SystemPage() {
                               hour: '2-digit',
                               minute: '2-digit'
                             });
-                          } catch (e) {
+                          } catch {
                             return '时间未知';
                           }
                         })()}
@@ -263,7 +263,7 @@ export default function SystemPage() {
                                 hour: '2-digit',
                                 minute: '2-digit'
                               });
-                            } catch (e) {
+                            } catch {
                               return '从未使用';
                             }
                           })()}

@@ -1,5 +1,3 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 
 // 数据库迁移脚本
@@ -9,7 +7,6 @@ export async function runMigration() {
   }
 
   const connection = postgres(process.env.POSTGRES_URL, { max: 1 });
-  const db = drizzle(connection);
 
   try {
     console.log('Starting database migration...');
