@@ -253,26 +253,8 @@ export default function ModelsPage() {
                     
                     {/* 使用情况 */}
                     <div className="col-span-3 flex items-center">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">
-                          {model.usageCount} 次使用
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          最后使用: {(() => {
-                            try {
-                              const lastUsed = model.lastUsedAt ? model.lastUsedAt * 1000 : model.createdAt;
-                              return new Date(lastUsed).toLocaleString('zh-CN', {
-                                year: 'numeric',
-                                month: '2-digit', 
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              });
-                            } catch {
-                              return '从未使用';
-                            }
-                          })()}
-                        </div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {model.usageCount} 次使用
                       </div>
                     </div>
                     
@@ -373,27 +355,6 @@ export default function ModelsPage() {
                         <span className="ml-2 font-medium text-gray-900">
                           {model.usageCount || 0} 次
                         </span>
-                        {model.lastUsedAt && (
-                          <>
-                            <span className="text-gray-400 mx-2">•</span>
-                            <span className="text-gray-600">
-                              {(() => {
-                                try {
-                                  const lastUsed = model.lastUsedAt * 1000;
-                                  return new Date(lastUsed).toLocaleString('zh-CN', {
-                                    year: 'numeric',
-                                    month: '2-digit',
-                                    day: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  });
-                                } catch {
-                                  return '从未使用';
-                                }
-                              })()}
-                            </span>
-                          </>
-                        )}
                       </div>
                     </div>
 
