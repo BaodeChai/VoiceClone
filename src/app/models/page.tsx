@@ -284,23 +284,25 @@ export default function ModelsPage() {
             </CardContent>
           </Card>
         ) : (
-          <Card>
-            <CardContent className="p-0">
-              {/* 表格头部 */}
-              <div className="bg-gray-50 border-b border-gray-200">
-                <div className="grid grid-cols-12 gap-4 px-6 py-4 text-sm font-medium text-gray-700">
-                  <div className="col-span-3">模型信息</div>
-                  <div className="col-span-2">状态</div>
-                  <div className="col-span-2">创建时间</div>
-                  <div className="col-span-3">使用情况</div>
-                  <div className="col-span-2">操作</div>
+          <>
+            {/* 桌面端表格视图 */}
+            <Card className="hidden md:block">
+              <CardContent className="p-0">
+                {/* 表格头部 */}
+                <div className="bg-gray-50 border-b border-gray-200">
+                  <div className="grid grid-cols-12 gap-4 px-6 py-4 text-sm font-medium text-gray-700">
+                    <div className="col-span-3">模型信息</div>
+                    <div className="col-span-2">状态</div>
+                    <div className="col-span-2">创建时间</div>
+                    <div className="col-span-3">使用情况</div>
+                    <div className="col-span-2">操作</div>
+                  </div>
                 </div>
-              </div>
-              
-              {/* 表格内容 */}
-              <div className="divide-y divide-gray-200">
-                {models.map((model) => (
-                  <div key={model.id} className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
+                
+                {/* 表格内容 */}
+                <div className="divide-y divide-gray-200">
+                  {models.map((model) => (
+                    <div key={model.id} className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
                     {/* 模型信息 */}
                     <div className="col-span-3">
                       <div className="flex items-center space-x-3">
@@ -412,7 +414,146 @@ export default function ModelsPage() {
                 ))}
               </div>
             </CardContent>
-          </Card>
+            </Card>
+
+            {/* 移动端卡片视图 */}
+            <div className="md:hidden space-y-4">
+              {models.map((model) => (
+                <Card key={model.id}>
+                  <CardContent className="p-4">
+                    {/* 模型标题和状态行 */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <i className="ri-mic-line text-blue-600 text-xl"></i>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-base leading-5 mb-1 break-words">
+                            {model.title}
+                          </h3>
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(model.status)}
+                            <span className="text-sm font-medium text-gray-700">
+                              {getStatusText(model.status)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 音频信息 */}
+                    <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="text-gray-600">时长:</span>
+                          <span className="ml-2 font-medium text-gray-900">
+                            {model.audioDuration ? formatDuration(model.audioDuration) : '未知'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">大小:</span>
+                          <span className="ml-2 font-medium text-gray-900">
+                            {model.audioSize ? formatFileSize(model.audioSize) : '未知'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 创建时间和使用情况 */}
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center text-sm">
+                        <i className="ri-time-line text-gray-400 mr-2"></i>
+                        <span className="text-gray-600">创建于:</span>
+                        <span className="ml-2 text-gray-900">
+                          {(() => {
+                            try {
+                              return new Date(model.createdAt).toLocaleString('zh-CN', {
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              });
+                            } catch {
+                              return '时间未知';
+                            }
+                          })()}
+                        </span>
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <i className="ri-bar-chart-line text-gray-400 mr-2"></i>
+                        <span className="text-gray-600">已使用:</span>
+                        <span className="ml-2 font-medium text-gray-900">
+                          {model.usageCount || 0} 次
+                        </span>
+                        {model.lastUsedAt && (
+                          <>
+                            <span className="text-gray-400 mx-2">•</span>
+                            <span className="text-gray-600">
+                              {(() => {
+                                try {
+                                  const lastUsed = model.lastUsedAt * 1000;
+                                  return new Date(lastUsed).toLocaleString('zh-CN', {
+                                    month: '2-digit',
+                                    day: '2-digit'
+                                  });
+                                } catch {
+                                  return '从未使用';
+                                }
+                              })()}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 操作按钮 */}
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                      <div className="flex items-center space-x-2">
+                        {model.status === 'ready' && model.audioPath && audioAvailability[model.id] && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handlePlayPause(model.id)}
+                            className={`${
+                              playingModelId === model.id 
+                                ? 'text-green-600 hover:text-green-700 hover:bg-green-50' 
+                                : 'text-gray-600 hover:text-gray-700 hover:bg-gray-50'
+                            }`}
+                            title="播放/停止原音频"
+                          >
+                            <i className={`text-lg ${
+                              playingModelId === model.id 
+                                ? 'ri-pause-line' 
+                                : 'ri-play-line'
+                            }`}></i>
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(model.id, model.title)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <i className="ri-delete-bin-line text-lg"></i>
+                        </Button>
+                      </div>
+                      {model.status === 'ready' && (
+                        <Button 
+                          variant="default" 
+                          size="sm"
+                          onClick={() => window.location.href = `/synthesis?modelId=${model.id}`}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4"
+                        >
+                          <i className="ri-volume-up-line mr-2"></i>
+                          使用
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </>
         )}
 
         {/* 统计信息 */}
