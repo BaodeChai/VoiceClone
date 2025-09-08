@@ -13,7 +13,7 @@ export async function GET(
     const { id } = await params;
     
     // 查找模型记录
-    const modelRecord = await (db as any)
+    const modelRecord = await db
       .select()
       .from(schema.models)
       .where(eq(schema.models.id, id))
@@ -26,11 +26,17 @@ export async function GET(
     const { audioPath } = modelRecord[0];
     
     if (!audioPath) {
+      console.error(`No audio path found for model ${id}`);
       return new NextResponse('Audio path not found for this model', { status: 404 });
     }
     
+    console.log(`Attempting to serve audio file: ${audioPath}`);
+    
     // 检查文件是否存在
     if (!existsSync(audioPath)) {
+      console.error(`Audio file not found at path: ${audioPath}`);
+      console.error(`Current working directory: ${process.cwd()}`);
+      console.error(`Environment: ${process.env.NODE_ENV}`);
       return new NextResponse('Audio file not found', { status: 404 });
     }
     
@@ -51,6 +57,10 @@ export async function GET(
     
   } catch (error) {
     console.error('Model audio serving error:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     
     return new NextResponse('Internal Server Error', { status: 500 });
   }

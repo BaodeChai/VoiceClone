@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
@@ -31,9 +31,37 @@ export default function ModelsPage() {
   const [modelToDelete, setModelToDelete] = useState<{id: string, title: string} | null>(null);
   const [playingModelId, setPlayingModelId] = useState<string | null>(null);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const [audioAvailability, setAudioAvailability] = useState<Record<string, boolean>>({});
+
+  // 检查音频文件可用性
+  const checkAudioAvailability = useCallback(async (models: VoiceModel[]) => {
+    const availability: Record<string, boolean> = {};
+    
+    for (const model of models) {
+      if (model.status === 'ready' && model.audioPath) {
+        try {
+          const response = await fetch(`/api/models/audio/check/${model.id}`);
+          const data = await response.json();
+          availability[model.id] = data.available;
+          
+          // 如果是云环境且文件不可用，记录信息
+          if (data.isCloudEnvironment && !data.available) {
+            console.log(`Audio file not available for model ${model.id} in cloud environment`);
+          }
+        } catch (error) {
+          console.error(`Failed to check audio availability for model ${model.id}:`, error);
+          availability[model.id] = false;
+        }
+      } else {
+        availability[model.id] = false;
+      }
+    }
+    
+    setAudioAvailability(availability);
+  }, []);
 
   // 获取模型列表
-  const fetchModels = async () => {
+  const fetchModels = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/models');
@@ -60,6 +88,9 @@ export default function ModelsPage() {
           lastUsedAt: model.lastUsedAt || null
         }));
         setModels(safeModels);
+        
+        // 检查音频文件可用性
+        checkAudioAvailability(safeModels);
       } else {
         console.error('Invalid response format:', data);
         throw new Error('Invalid response format');
@@ -71,11 +102,11 @@ export default function ModelsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [checkAudioAvailability]);
 
   useEffect(() => {
     fetchModels();
-  }, []);
+  }, [fetchModels]);
 
   // 清理音频播放器
   useEffect(() => {
@@ -339,7 +370,7 @@ export default function ModelsPage() {
                     
                     {/* 操作 */}
                     <div className="col-span-2 flex items-center space-x-2">
-                      {model.status === 'ready' && model.audioPath && (
+                      {model.status === 'ready' && model.audioPath && audioAvailability[model.id] && (
                         <Button
                           variant="ghost"
                           size="default"
