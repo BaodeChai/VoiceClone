@@ -15,9 +15,18 @@ export async function POST(request: NextRequest) {
 
     // 验证文件类型和大小
     const supportedTypes = [
-      'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave', 
-      'audio/x-wav', 'audio/flac', 'audio/x-flac', 
-      'audio/mp4', 'audio/m4a', 'audio/x-m4a'
+      // MP3 格式
+      'audio/mpeg', 'audio/mp3', 'audio/mpeg3', 'audio/x-mpeg-3',
+      // WAV 格式
+      'audio/wav', 'audio/wave', 'audio/x-wav', 'audio/x-pn-wav',
+      // FLAC 格式
+      'audio/flac', 'audio/x-flac',
+      // M4A/MP4 格式 (包括 AAC)
+      'audio/mp4', 'audio/m4a', 'audio/x-m4a', 'audio/aac', 'audio/x-aac',
+      // OGG 格式
+      'audio/ogg', 'audio/x-ogg', 'audio/ogg; codecs=vorbis',
+      // WebM 格式
+      'audio/webm'
     ];
 
     if (!supportedTypes.includes(file.type)) {

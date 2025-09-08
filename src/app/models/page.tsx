@@ -29,18 +29,45 @@ export default function ModelsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [modelToDelete, setModelToDelete] = useState<{id: string, title: string} | null>(null);
+  const [playingModelId, setPlayingModelId] = useState<string | null>(null);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
 
   // 获取模型列表
   const fetchModels = async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/models');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      if (data.success) {
-        setModels(data.models);
+      console.log('Models data received:', data);
+      
+      if (data.success && Array.isArray(data.models)) {
+        // 确保每个模型都有必需的字段
+        const safeModels = data.models.map((model: any) => ({
+          id: model.id || '',
+          title: model.title || '未命名模型',
+          status: model.status || 'unknown',
+          createdAt: model.createdAt || new Date().toISOString(),
+          fishModelId: model.fishModelId || null,
+          audioPath: model.audioPath || null,
+          audioDuration: model.audioDuration || 0,
+          audioSize: model.audioSize || 0,
+          usageCount: model.usageCount || 0,
+          lastUsedAt: model.lastUsedAt || null
+        }));
+        setModels(safeModels);
+      } else {
+        console.error('Invalid response format:', data);
+        throw new Error('Invalid response format');
       }
     } catch (error) {
       console.error('Failed to fetch models:', error);
+      // 在出错时设置空数组而不是保持loading状态
+      setModels([]);
     } finally {
       setLoading(false);
     }
@@ -49,6 +76,17 @@ export default function ModelsPage() {
   useEffect(() => {
     fetchModels();
   }, []);
+
+  // 清理音频播放器
+  useEffect(() => {
+    return () => {
+      if (currentAudio) {
+        currentAudio.pause();
+        setCurrentAudio(null);
+        setPlayingModelId(null);
+      }
+    };
+  }, [currentAudio]);
 
   // 打开删除确认对话框
   const handleDeleteClick = (modelId: string, modelTitle: string) => {
@@ -82,6 +120,59 @@ export default function ModelsPage() {
       console.error('Delete model failed:', error);
       setDeleteDialogOpen(false);
       setModelToDelete(null);
+    }
+  };
+
+  // 播放/停止原音频
+  const handlePlayPause = async (modelId: string) => {
+    try {
+      // 如果正在播放同一个模型的音频，则停止播放
+      if (playingModelId === modelId && currentAudio) {
+        currentAudio.pause();
+        setPlayingModelId(null);
+        setCurrentAudio(null);
+        return;
+      }
+
+      // 如果有其他音频正在播放，先停止
+      if (currentAudio) {
+        currentAudio.pause();
+      }
+
+      // 创建新的音频实例
+      const audio = new Audio(`/api/models/audio/${modelId}`);
+      
+      // 设置音频事件监听器
+      audio.onloadstart = () => {
+        console.log('开始加载音频...');
+      };
+      
+      audio.oncanplay = () => {
+        console.log('音频可以开始播放');
+      };
+      
+      audio.onended = () => {
+        setPlayingModelId(null);
+        setCurrentAudio(null);
+      };
+      
+      audio.onerror = (e) => {
+        console.error('音频播放失败:', e);
+        alert('音频播放失败，请检查文件是否存在');
+        setPlayingModelId(null);
+        setCurrentAudio(null);
+      };
+
+      // 开始播放
+      await audio.play();
+      setPlayingModelId(modelId);
+      setCurrentAudio(audio);
+
+    } catch (error) {
+      console.error('播放音频时出错:', error);
+      alert('播放失败，请重试');
+      setPlayingModelId(null);
+      setCurrentAudio(null);
     }
   };
 
@@ -205,13 +296,19 @@ export default function ModelsPage() {
                     {/* 创建时间 */}
                     <div className="col-span-2 flex items-center">
                       <span className="text-sm text-gray-900">
-                        {new Date(model.createdAt).toLocaleString('zh-CN', {
-                          year: 'numeric',
-                          month: '2-digit', 
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {(() => {
+                          try {
+                            return new Date(model.createdAt).toLocaleString('zh-CN', {
+                              year: 'numeric',
+                              month: '2-digit', 
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            });
+                          } catch (e) {
+                            return '时间未知';
+                          }
+                        })()}
                       </span>
                     </div>
                     
@@ -222,19 +319,45 @@ export default function ModelsPage() {
                           {model.usageCount} 次使用
                         </div>
                         <div className="text-xs text-gray-500">
-                          最后使用: {new Date((model.lastUsedAt ? model.lastUsedAt * 1000 : model.createdAt)).toLocaleString('zh-CN', {
-                            year: 'numeric',
-                            month: '2-digit', 
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                          最后使用: {(() => {
+                            try {
+                              const lastUsed = model.lastUsedAt ? model.lastUsedAt * 1000 : model.createdAt;
+                              return new Date(lastUsed).toLocaleString('zh-CN', {
+                                year: 'numeric',
+                                month: '2-digit', 
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              });
+                            } catch (e) {
+                              return '从未使用';
+                            }
+                          })()}
                         </div>
                       </div>
                     </div>
                     
                     {/* 操作 */}
                     <div className="col-span-2 flex items-center space-x-2">
+                      {model.status === 'ready' && model.audioPath && (
+                        <Button
+                          variant="ghost"
+                          size="default"
+                          onClick={() => handlePlayPause(model.id)}
+                          className={`w-10 h-10 p-0 ${
+                            playingModelId === model.id 
+                              ? 'text-green-600 hover:text-green-700 hover:bg-green-50' 
+                              : 'text-gray-600 hover:text-gray-700 hover:bg-gray-50'
+                          }`}
+                          title="播放/停止原音频"
+                        >
+                          <i className={`text-lg ${
+                            playingModelId === model.id 
+                              ? 'ri-pause-line' 
+                              : 'ri-play-line'
+                          }`}></i>
+                        </Button>
+                      )}
                       {model.status === 'ready' && (
                         <Button 
                           variant="outline" 

@@ -280,7 +280,7 @@ export function VoiceCloneSection({ onModelCreated }: VoiceCloneSectionProps) {
                   <input
                     id="audio-upload"
                     type="file"
-                    accept="audio/mp3,audio/wav,audio/m4a,audio/mpeg,audio/x-wav"
+                    accept="audio/mp3,audio/wav,audio/m4a,audio/aac,audio/flac,audio/ogg,audio/webm,audio/mpeg,audio/x-wav,audio/x-m4a,audio/x-aac,audio/x-flac,audio/x-ogg,audio/mp4"
                     onChange={handleFileInputChange}
                     className="hidden"
                     disabled={isUploading}

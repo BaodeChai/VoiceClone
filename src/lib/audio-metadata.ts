@@ -18,12 +18,40 @@ export async function getAudioMetadata(filePath: string): Promise<AudioMetadata>
     const stats = await stat(filePath);
     const size = stats.size;
 
-    // 使用文件大小估算音频时长（粗略估算）
-    // 假设 MP3 平均比特率为 128kbps
-    const estimatedBitrate = 128 * 1000; // 128kbps in bits per second
+    // 根据文件扩展名估算比特率
+    const fileExtension = filePath.toLowerCase().split('.').pop();
+    let estimatedBitrate: number;
+
+    switch (fileExtension) {
+      case 'wav':
+        // WAV 无损格式，通常是 1411kbps (CD 质量: 44.1kHz * 16bit * 2 channels)
+        estimatedBitrate = 1411 * 1000;
+        break;
+      case 'flac':
+        // FLAC 无损压缩格式，通常是原始音频的 50-70%
+        estimatedBitrate = 900 * 1000;
+        break;
+      case 'm4a':
+      case 'aac':
+        // M4A/AAC 通常比 MP3 效率更高，平均 128kbps
+        estimatedBitrate = 128 * 1000;
+        break;
+      case 'ogg':
+      case 'webm':
+        // OGG/WebM 通常比 MP3 效率更高，平均 128kbps
+        estimatedBitrate = 128 * 1000;
+        break;
+      case 'mp3':
+      case 'mpeg':
+      default:
+        // MP3 默认平均比特率为 128kbps
+        estimatedBitrate = 128 * 1000;
+        break;
+    }
+
     const duration = Math.round((size * 8) / estimatedBitrate);
 
-    console.log(`Audio metadata for ${filePath}: size=${size}, estimated duration=${duration}s`);
+    console.log(`Audio metadata for ${filePath}: size=${size}, format=${fileExtension}, estimated bitrate=${estimatedBitrate/1000}kbps, estimated duration=${duration}s`);
 
     return {
       duration,

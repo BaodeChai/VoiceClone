@@ -35,12 +35,36 @@ export default function SystemPage() {
     try {
       setLoading(true);
       const response = await fetch('/api/models');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      if (data.success) {
-        setModels(data.models);
+      console.log('Models data received:', data);
+      
+      if (data.success && Array.isArray(data.models)) {
+        // 确保每个模型都有必需的字段
+        const safeModels = data.models.map((model: any) => ({
+          id: model.id || '',
+          title: model.title || '未命名模型',
+          status: model.status || 'unknown',
+          createdAt: model.createdAt || new Date().toISOString(),
+          fishModelId: model.fishModelId || null,
+          audioDuration: model.audioDuration || 0,
+          audioSize: model.audioSize || 0,
+          usageCount: model.usageCount || 0,
+          lastUsedAt: model.lastUsedAt || null
+        }));
+        setModels(safeModels);
+      } else {
+        console.error('Invalid response format:', data);
+        throw new Error('Invalid response format');
       }
     } catch (error) {
       console.error('Failed to fetch models:', error);
+      // 在出错时设置空数组而不是保持loading状态
+      setModels([]);
     } finally {
       setLoading(false);
     }
@@ -206,13 +230,19 @@ export default function SystemPage() {
                     {/* 创建时间 */}
                     <div className="col-span-2 flex items-center">
                       <span className="text-sm text-gray-900">
-                        {new Date(model.createdAt).toLocaleString('zh-CN', {
-                          year: 'numeric',
-                          month: '2-digit', 
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {(() => {
+                          try {
+                            return new Date(model.createdAt).toLocaleString('zh-CN', {
+                              year: 'numeric',
+                              month: '2-digit', 
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            });
+                          } catch (e) {
+                            return '时间未知';
+                          }
+                        })()}
                       </span>
                     </div>
                     
@@ -223,13 +253,20 @@ export default function SystemPage() {
                           {model.usageCount || 0} 次使用
                         </div>
                         <div className="text-xs text-gray-500">
-                          最后使用: {new Date((model.lastUsedAt ? model.lastUsedAt * 1000 : model.createdAt)).toLocaleString('zh-CN', {
-                            year: 'numeric',
-                            month: '2-digit', 
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                          最后使用: {(() => {
+                            try {
+                              const lastUsed = model.lastUsedAt ? model.lastUsedAt * 1000 : model.createdAt;
+                              return new Date(lastUsed).toLocaleString('zh-CN', {
+                                year: 'numeric',
+                                month: '2-digit', 
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              });
+                            } catch (e) {
+                              return '从未使用';
+                            }
+                          })()}
                         </div>
                       </div>
                     </div>

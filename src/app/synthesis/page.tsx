@@ -216,23 +216,43 @@ function VoiceSynthesisContent() {
           <Card>
             <CardContent className="p-6">
               <div className="flex space-x-4">
-                <Button
-                  onClick={handleGenerate}
-                  disabled={!selectedModel || !inputText.trim() || isGenerating}
-                  className="flex-1"
-                >
-                  {isGenerating ? (
-                    <>
-                      <RiLoader4Line className="mr-2 animate-spin" />
-                      生成中...
-                    </>
-                  ) : (
-                    <>
-                      <RiVolumeUpLine className="mr-2" />
-                      {t('generateSpeech')}
-                    </>
+                <div className="relative flex-1 group">
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={!selectedModel || !inputText.trim() || isGenerating}
+                    className="w-full"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <RiLoader4Line className="mr-2 animate-spin" />
+                        生成中...
+                      </>
+                    ) : (
+                      <>
+                        <RiVolumeUpLine className="mr-2" />
+                        {t('generateSpeech')}
+                      </>
+                    )}
+                  </Button>
+                  
+                  {/* 悬停提示 */}
+                  {(!selectedModel || !inputText.trim() || isGenerating) && (
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                      {isGenerating 
+                        ? "正在生成语音，请稍候..." 
+                        : !selectedModel && !inputText.trim()
+                        ? "请先选择声音模型并输入文本内容"
+                        : !selectedModel
+                        ? "请先选择一个声音模型"
+                        : !inputText.trim()
+                        ? "请先输入要转换的文本内容"
+                        : ""
+                      }
+                      {/* 箭头 */}
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                    </div>
                   )}
-                </Button>
+                </div>
                 <Button
                   variant="outline"
                   onClick={() => {

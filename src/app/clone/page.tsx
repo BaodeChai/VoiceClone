@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
@@ -9,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { RiUploadCloud2Line, RiFileMusicLine, RiCloseLine, RiLoader4Line, RiCpuLine, RiCheckLine, RiListCheck } from 'react-icons/ri';
 
 export default function VoiceClonePage() {
+  const router = useRouter();
   const { t } = useTranslation();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState('');
@@ -20,9 +22,16 @@ export default function VoiceClonePage() {
     const file = event.target.files?.[0];
     if (file) {
       // 验证文件格式
-      const allowedTypes = ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/mpeg'];
+      const allowedTypes = [
+        'audio/mp3', 'audio/mpeg', 'audio/mpeg3', 'audio/x-mpeg-3',
+        'audio/wav', 'audio/wave', 'audio/x-wav', 'audio/x-pn-wav',
+        'audio/m4a', 'audio/x-m4a', 'audio/aac', 'audio/x-aac',
+        'audio/flac', 'audio/x-flac',
+        'audio/ogg', 'audio/x-ogg',
+        'audio/webm', 'audio/mp4'
+      ];
       if (!allowedTypes.includes(file.type)) {
-        alert('请选择MP3、WAV或M4A格式的音频文件');
+        alert('请选择支持的音频格式：MP3、WAV、M4A、AAC、FLAC、OGG、WebM');
         return;
       }
       
@@ -153,7 +162,7 @@ export default function VoiceClonePage() {
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
                     <input
                       type="file"
-                      accept=".mp3,.wav,.m4a,audio/*"
+                      accept=".mp3,.wav,.m4a,.aac,.flac,.ogg,.webm,audio/*"
                       onChange={handleFileSelect}
                       className="hidden"
                       id="audio-upload"
@@ -261,7 +270,23 @@ export default function VoiceClonePage() {
                   </Button>
                   <Button 
                     variant="outline"
-                    onClick={() => window.location.href = '/system'}
+                    disabled={isUploading}
+                    onClick={() => {
+                      // 如果正在上传，则等待一下再跳转，避免网络请求冲突
+                      if (isUploading) {
+                        return;
+                      }
+                      
+                      try {
+                        router.push('/models');
+                      } catch (error) {
+                        console.error('Navigation error:', error);
+                        // 如果Next.js路由失败，使用备用方案
+                        setTimeout(() => {
+                          window.location.href = '/models';
+                        }, 100);
+                      }
+                    }}
                   >
                     <RiListCheck className="mr-2" />
                     查看模型
