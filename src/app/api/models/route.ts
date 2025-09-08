@@ -18,7 +18,7 @@ export async function GET() {
         createdAt: schema.models.createdAt,
         updatedAt: schema.models.updatedAt,
         usageCount: sql<number>`COALESCE(COUNT(${schema.ttsHistory.id}), 0)`,
-        lastUsedAt: sql<string | null>`MAX(${schema.ttsHistory.createdAt})`
+        lastUsedAt: sql<number | null>`MAX(${schema.ttsHistory.createdAt})`
       })
       .from(schema.models)
       .leftJoin(schema.ttsHistory, sql`${schema.models.id} = ${schema.ttsHistory.modelId}`)
