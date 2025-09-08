@@ -421,7 +421,7 @@ export default function ModelsPage() {
             <Card>
               <CardContent className="p-6 text-center">
                 <div className="text-2xl font-bold text-purple-600 mb-1">
-                  {models.reduce((total, model) => total + (model.usageCount || 0), 0)}
+                  {models.reduce((total, model) => total + Number(model.usageCount || 0), 0)}
                 </div>
                 <p className="text-sm text-gray-600">总使用次数</p>
               </CardContent>

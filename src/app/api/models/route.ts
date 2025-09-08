@@ -17,7 +17,7 @@ export async function GET() {
         audioSize: schema.models.audioSize,
         createdAt: schema.models.createdAt,
         updatedAt: schema.models.updatedAt,
-        usageCount: sql<number>`COALESCE(COUNT(${schema.ttsHistory.id}), 0)`,
+        usageCount: sql<number>`CAST(COALESCE(COUNT(${schema.ttsHistory.id}), 0) AS INTEGER)`,
         lastUsedAt: sql<number | null>`MAX(${schema.ttsHistory.createdAt})`
       })
       .from(schema.models)
@@ -25,9 +25,18 @@ export async function GET() {
       .groupBy(schema.models.id)
       .orderBy(desc(schema.models.createdAt));
     
+    // 确保数字类型正确，防止PostgreSQL返回字符串
+    const processedModels = models.map((model: any) => ({
+      ...model,
+      usageCount: Number(model.usageCount || 0),
+      audioDuration: model.audioDuration ? Number(model.audioDuration) : null,
+      audioSize: model.audioSize ? Number(model.audioSize) : null,
+      lastUsedAt: model.lastUsedAt ? Number(model.lastUsedAt) : null
+    }));
+    
     return NextResponse.json({
       success: true,
-      models
+      models: processedModels
     });
     
   } catch (error) {
