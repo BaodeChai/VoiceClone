@@ -3,6 +3,7 @@ import { db, schema } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
+import { deleteFishModel } from '@/lib/fish-audio';
 
 export async function DELETE(
   request: NextRequest,
@@ -42,15 +43,17 @@ export async function DELETE(
       }
     }
 
-    // TODO: 如果需要，也删除Fish Audio平台上的模型
-    // 这需要调用Fish Audio API的删除接口
+    // 删除Fish Audio云端模型
     if (model.fishModelId) {
-      console.log(`Note: Fish Audio model ${model.fishModelId} should be deleted manually on the platform`);
-      // try {
-      //   await deleteFishModel(model.fishModelId);
-      // } catch (fishError) {
-      //   console.warn('Failed to delete Fish Audio model:', fishError);
-      // }
+      try {
+        console.log(`Attempting to delete Fish Audio model: ${model.fishModelId}`);
+        await deleteFishModel(model.fishModelId);
+        console.log(`Successfully deleted Fish Audio model: ${model.fishModelId}`);
+      } catch (fishError) {
+        console.warn('Failed to delete Fish Audio model:', fishError);
+        // 记录错误但继续删除本地记录
+        // 这样即使Fish Audio删除失败，本地记录仍会被清理
+      }
     }
 
     // 从数据库删除模型记录

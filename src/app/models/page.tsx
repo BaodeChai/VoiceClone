@@ -29,6 +29,9 @@ export default function ModelsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [modelToDelete, setModelToDelete] = useState<{id: string, title: string} | null>(null);
+  const [debugLoading, setDebugLoading] = useState(false);
+  const [debugDialogOpen, setDebugDialogOpen] = useState(false);
+  const [debugResult, setDebugResult] = useState<any>(null);
 
 
   // 获取模型列表
@@ -75,6 +78,27 @@ export default function ModelsPage() {
   useEffect(() => {
     fetchModels();
   }, []);
+
+  // Fish Audio调试功能
+  const handleFishAudioDebug = async () => {
+    try {
+      setDebugLoading(true);
+      const response = await fetch('/api/debug/fish-models');
+      const data = await response.json();
+      
+      if (data.success) {
+        setDebugResult(data.analysis);
+        setDebugDialogOpen(true);
+      } else {
+        alert(`调试失败: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Debug request failed:', error);
+      alert('调试请求失败，请检查网络连接');
+    } finally {
+      setDebugLoading(false);
+    }
+  };
 
 
   // 打开删除确认对话框
@@ -163,10 +187,21 @@ export default function ModelsPage() {
                 {models.length} 个模型
               </span>
             </div>
-            <Button onClick={() => window.location.href = '/clone'}>
-              <i className="ri-add-line mr-2"></i>
-              创建新模型
-            </Button>
+            <div className="flex space-x-3">
+              <Button 
+                variant="outline" 
+                onClick={handleFishAudioDebug}
+                disabled={debugLoading}
+                className="text-purple-600 border-purple-300 hover:bg-purple-50"
+              >
+                <i className={`mr-2 ${debugLoading ? 'ri-loader-4-line animate-spin' : 'ri-bug-line'}`}></i>
+                {debugLoading ? '调试中...' : 'Fish Audio调试'}
+              </Button>
+              <Button onClick={() => window.location.href = '/clone'}>
+                <i className="ri-add-line mr-2"></i>
+                创建新模型
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -460,6 +495,145 @@ export default function ModelsPage() {
           <DialogFooter>
             <Button onClick={() => setSuccessDialogOpen(false)}>
               确定
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Fish Audio调试结果对话框 */}
+      <Dialog open={debugDialogOpen} onOpenChange={setDebugDialogOpen}>
+        <DialogContent className="sm:max-w-[800px] max-h-[600px] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <i className="ri-bug-line mr-2 text-purple-600"></i>
+              Fish Audio 模型调试信息
+            </DialogTitle>
+            <DialogDescription>
+              本地数据库与Fish Audio云端模型的同步状态分析
+            </DialogDescription>
+          </DialogHeader>
+          
+          {debugResult && (
+            <div className="space-y-6">
+              {/* 统计概览 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-blue-800 mb-2">本地数据库</h3>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {debugResult.localModelsCount} 个模型
+                  </div>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-green-800 mb-2">Fish Audio云端</h3>
+                  <div className="text-2xl font-bold text-green-600">
+                    {debugResult.fishModelsCount} 个模型
+                  </div>
+                </div>
+              </div>
+
+              {/* 数据一致性检查 */}
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
+                  <i className="ri-shield-check-line mr-2"></i>
+                  数据一致性检查
+                </h3>
+                
+                {debugResult.consistency.orphanedLocalModels.length > 0 && (
+                  <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                    <h4 className="font-medium text-yellow-800 mb-2">
+                      ⚠️ 孤儿本地模型 ({debugResult.consistency.orphanedLocalModels.length}个)
+                    </h4>
+                    <p className="text-sm text-yellow-700 mb-2">
+                      这些模型在本地数据库中存在，但Fish Audio云端已不存在：
+                    </p>
+                    <div className="space-y-1">
+                      {debugResult.consistency.orphanedLocalModels.map((model: any, index: number) => (
+                        <div key={index} className="text-sm bg-white p-2 rounded border">
+                          <span className="font-medium">{model.title}</span> 
+                          <span className="text-gray-500 ml-2">(ID: {model.fishModelId})</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {debugResult.consistency.orphanedFishModels.length > 0 && (
+                  <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded">
+                    <h4 className="font-medium text-orange-800 mb-2">
+                      🔄 孤儿Fish模型 ({debugResult.consistency.orphanedFishModels.length}个)
+                    </h4>
+                    <p className="text-sm text-orange-700 mb-2">
+                      这些模型在Fish Audio云端存在，但本地数据库中没有记录：
+                    </p>
+                    <div className="space-y-1">
+                      {debugResult.consistency.orphanedFishModels.map((model: any, index: number) => (
+                        <div key={index} className="text-sm bg-white p-2 rounded border">
+                          <span className="font-medium">{model.title || '未命名'}</span>
+                          <span className="text-gray-500 ml-2">(ID: {model.fishId})</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {debugResult.consistency.orphanedLocalModels.length === 0 && 
+                 debugResult.consistency.orphanedFishModels.length === 0 && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded">
+                    <p className="text-green-700 flex items-center">
+                      <i className="ri-check-line mr-2"></i>
+                      数据一致性良好，本地和云端模型完全同步
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* 详细模型列表 */}
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold text-gray-800 mb-3">详细模型信息</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* 本地模型 */}
+                  <div>
+                    <h4 className="font-medium text-blue-800 mb-2">本地数据库模型</h4>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {debugResult.localModels.map((model: any, index: number) => (
+                        <div key={index} className="text-sm p-2 bg-blue-50 rounded">
+                          <div className="font-medium">{model.title}</div>
+                          <div className="text-gray-600 text-xs">
+                            Fish ID: {model.fishModelId || '无'} | 状态: {model.status}
+                          </div>
+                        </div>
+                      ))}
+                      {debugResult.localModels.length === 0 && (
+                        <div className="text-gray-500 text-sm italic">无本地模型</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Fish Audio模型 */}
+                  <div>
+                    <h4 className="font-medium text-green-800 mb-2">Fish Audio云端模型</h4>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {debugResult.fishModels.map((model: any, index: number) => (
+                        <div key={index} className="text-sm p-2 bg-green-50 rounded">
+                          <div className="font-medium">{model.title || '未命名'}</div>
+                          <div className="text-gray-600 text-xs">
+                            ID: {model.id} | 状态: {model.status || '未知'}
+                          </div>
+                        </div>
+                      ))}
+                      {debugResult.fishModels.length === 0 && (
+                        <div className="text-gray-500 text-sm italic">无云端模型</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button onClick={() => setDebugDialogOpen(false)}>
+              关闭
             </Button>
           </DialogFooter>
         </DialogContent>
